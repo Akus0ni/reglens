@@ -70,14 +70,15 @@ If the hook blocks you, create the right branch; never work around it.
 | Answers | Retrieved text is **data, never instructions** (OWASP LLM01). Structured output `{answer, citations[{chunkId, quote}], abstained, missingInfo}`. A code verifier checks every cited id was retrieved and every quote is in that chunk (normalised substring); failed citations are dropped, none left → abstain. Claude decides abstention; a similarity floor skips the call for unrelated questions. Not Claude's built-in Citations (incompatible with structured outputs). `POST /ask`, HybridCache + Redis |
 | MCP | `ModelContextProtocol.AspNetCore` over HTTP at `/mcp`. Read-only tools `search_regulations`, `get_passage`, `ask_regulations`, with size-capped results |
 | Ops | OpenTelemetry → standalone Aspire dashboard (UI 18888, OTLP 4317); rate limiting; API key; `/health/live` + `/health/ready`; SELECT-only Postgres role for the API; `AddStandardResilienceHandler` on outbound HTTP |
-| Evals | Golden set of 30 (20 answerable with expected doc + paragraph, 10 unanswerable). recall@5, MRR, abstention accuracy, groundedness/relevance (M.E.AI.Evaluation.Quality, Haiku judge, hand-checked). Results in `evals/results.md` with n, date and model IDs. Never report a number without n |
+| Evals | `evals/golden-set.json` (30: 20 answerable with expected doc + references, 10 not), owner-reviewed. `src/RegLens.Evals` console app, never in `dotnet test`; paid runs need `--confirm-spend`. recall@5/@8, MRR@10, abstention accuracy, citation rate, groundedness/relevance (Haiku judge with a TopP-dropping wrapper, 10 hand-checked). Results in `evals/results.md` with n, date, model IDs, commit. Never report a number without n |
 
 ## Corpus rules
 
 - `corpus/` holds the official PDFs and `corpus/manifest.json` (source page + URL, version, download date, bytes,
   pages, SHA-256). Adding, replacing or removing a document is a change to the manifest in the same PR.
-- Scope is **NBFCs**: RBI (NBFCs – KYC) Directions 2025 and RBI (NBFCs – Credit Facilities) Directions 2025
-  (Chapter III = Digital Lending), plus DPDP Rules 2025 (G.S.R. 846(E)) and its corrigendum (G.S.R. 892(E)).
+- Scope is **NBFCs**: RBI (NBFCs – KYC) Directions 2025, RBI (NBFCs – Credit Facilities) Directions 2025
+  (Chapter III = Digital Lending) and RBI (NBFCs – Responsible Business Conduct) Directions 2025 (KFS, penal
+  charges, recovery; D41), plus DPDP Rules 2025 (G.S.R. 846(E)) and its corrigendum (G.S.R. 892(E)).
 - RBI repealed the 2016 KYC Master Direction and the standalone Digital Lending Directions on 28 Nov 2025. Never cite
   or ingest them.
 - Ingest only the manifest's `ingest_pages` where given (DPDP Rules: English pages 24–41). Hindi text extracts as

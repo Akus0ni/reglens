@@ -2,6 +2,16 @@
 
 Newest first. What was done, why, and the problems hit.
 
+## 2026-11-23 — Spec 0004 drafted: golden set, evals, BM25
+
+- PR #10 merged. Q7 answered yes: RBI (NBFCs – Responsible Business Conduct) Directions 2025 (id 12942, updated as on
+  1 July 2026) downloaded through the owner's Chrome (495,859 bytes, 36 pages, Annex I = KFS format inside).
+- Owner decisions D41–D48: golden set drafted by Claude and reviewed row by row; BM25 in SQL; contextual retrieval
+  split into spec 0005 (MCP → 0006); console eval runner; medium effort only; Haiku judge hand-checked; floor from
+  the golden set.
+- Found while checking sources: Microsoft's quality evaluators send `temperature` and `top_p` together, which Claude
+  4.x rejects; the judge gets a wrapper that drops `top_p`.
+
 ## 2026-11-23 — Spec 0003: answers with verified citations built
 
 - `POST /ask`: search → similarity floor → Sonnet 5.5 with passages as escaped data and a JSON schema → our

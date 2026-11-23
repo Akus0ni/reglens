@@ -42,7 +42,7 @@ product features for compliance.
 | D24 | Schema via versioned SQL scripts applied in order and recorded in `schema_version` (spec 0001) | Owner | 2026-11-23 |
 | D25 | Build and test conventions mirror InvoiceGen: `global.json` + Microsoft.Testing.Platform, Central Package Management, `Directory.Build.props` (warnings as errors), xUnit v3, AwesomeAssertions, NSubstitute, Testcontainers (spec 0001) | Owner | 2026-11-23 |
 | D26 | Local infrastructure via `docker-compose.yml` (pgvector Postgres + standalone Aspire dashboard); Ollama runs natively (spec 0001) | Owner | 2026-11-23 |
-| D27 | `RegLens.Api` is created in spec 0002, bound to 127.0.0.1, without an API key; the key and rate limits come with spec 0005 | Owner | 2026-11-23 |
+| D27 | `RegLens.Api` is created in spec 0002, bound to 127.0.0.1, without an API key; the key and rate limits come with spec 0006 (renumbered by D44) | Owner | 2026-11-23 |
 | D28 | Citations in a query ("Rule 7", "para 6") are looked up exactly and shown first; `para_ref` and `heading` join the keyword index (spec 0002) | Owner | 2026-11-23 |
 | D29 | Every search hit carries its dense rank, keyword rank and fused score (spec 0002) | Owner | 2026-11-23 |
 | D30 | No document filter in spec 0002; a filter gets its own spec using pgvector iterative scans | Owner | 2026-11-23 |
@@ -56,17 +56,24 @@ product features for compliance.
 | D38 | With vector search degraded, `/ask` answers from keyword-only hits, flagged, not cached (spec 0003) | Owner | 2026-11-23 |
 | D39 | Quotes are verified as a normalised substring (whitespace, quote and dash variants equal; case and words exact) (spec 0003) | Owner | 2026-11-23 |
 | D40 | Spec 0002's A5 gap is accepted; IDF / BM25-style keyword weighting is evaluated in spec 0004 against the golden set | Owner | 2026-11-23 |
+| D41 | Add the RBI (NBFCs – Responsible Business Conduct) Directions, 2025 (id 12942, updated as on 1 July 2026), all 36 pages including Annex I (resolves Q7; spec 0004) | Owner | 2026-11-23 |
+| D42 | The golden set is drafted by Claude and every row is reviewed by the owner (spec 0004) | Owner | 2026-11-23 |
+| D43 | BM25 keyword scoring computed in our SQL (Lucene formula, k1 1.2, b 0.75) from statistics refreshed on ingest; no new extension (spec 0004) | Owner | 2026-11-23 |
+| D44 | Contextual retrieval is its own spec (0005); MCP and production basics move to 0006 | Owner | 2026-11-23 |
+| D45 | Evals run from a console app `src/RegLens.Evals`, not from `dotnet test` (spec 0004) | Owner | 2026-11-23 |
+| D46 | Answer evals at effort medium only (spec 0004) | Owner | 2026-11-23 |
+| D47 | Judge: Groundedness + Relevance (Microsoft.Extensions.AI.Evaluation.Quality) with `claude-haiku-4-5`; owner hand-checks 10 judgements (spec 0004) | Owner | 2026-11-23 |
+| D48 | Similarity floor = highest with no answerable question refused, minus 0.02 (spec 0004) | Owner | 2026-11-23 |
 
 ## 3. Open questions
 
 | # | Question | Blocks |
 |---|----------|--------|
 | Q1 | Add the DPDP Act 2023 to the corpus? (plan says "if time allows") | Golden-set questions on consent |
-| Q3 | How is the API key provisioned and checked (user-secrets, header name, rotation)? | Spec 0005 |
+| Q3 | How is the API key provisioned and checked (user-secrets, header name, rotation)? | Spec 0006 |
 | Q4 | Name and visibility of the Day 2 agent repo | Day 2 |
 | Q5 | Langfuse Cloud (Hobby) or self-hosted for agent traces | Day 2 tracing |
 | Q6 | Set `OLLAMA_KEEP_ALIVE` (e.g. `24h`) on the owner's machine so the embedding model stays loaded between searches? | Nothing (cold searches wait ~30 s) |
-| Q7 | Add the RBI (NBFCs – Responsible Business Conduct) Directions, 2025 to the corpus? Credit Facilities Para 9 points there for the Key Fact Statement's contents, so KFS questions abstain today (spec 0003 §9) | Golden-set questions on KFS and loan disclosures |
 
 ## 4. Specs (proposed order)
 
@@ -75,7 +82,8 @@ product features for compliance.
 | 0001 | Ingest the corpus: extract, chunk by paragraph, embed, upsert | D1·2 |
 | 0002 | Hybrid retrieval with RRF and `GET /search` | D1·3 |
 | 0003 | Answers with verified citations, abstention, answer cache | D1·4 |
-| 0004 | Golden set and evals (three configs, contextual retrieval); keyword IDF weighting (D40); tune the similarity floor and effort (D33, D36) | D1·5 |
-| 0005 | MCP server, tracing and production basics | D1·6 |
+| 0004 | Golden set, eval runner, retrieval and answer metrics, BM25 (D40, D43), floor from data (D48), new RBC document (D41) | D1·5 |
+| 0005 | Contextual retrieval (Haiku context per chunk, re-embed), measured against 0004's baseline (D44) | D1·5 |
+| 0006 | MCP server, tracing and production basics | D1·6 |
 
 Numbers are proposals; a spec gets its number when its spec PR is opened.
