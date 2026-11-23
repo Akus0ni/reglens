@@ -2,6 +2,18 @@
 
 Newest first. What was done, why, and the problems hit.
 
+## 2026-11-24 — Spec 0005 drafted: contextual retrieval and heading fixes
+
+- PRs #13 and #14 merged. Owner decisions D50–D55: Haiku 5.5 writes chunk context; heading fixes and headings in the
+  answer prompt join this spec; context for retrieval only; replace in place; a failure fails the document with
+  resumable cached contexts; $2 cap.
+- Found while writing it: `claude-haiku-5-5` (2026-10-07) is live and ten times cheaper than Haiku 4.5, with thinking
+  on by default (so the spec sets effort low). Its tokenizer counts this corpus about 1.4× higher (exact counts via
+  `count_tokens`). An unchanged PDF is always skipped on ingest, so a pipeline version is needed for new context to
+  apply at all. Five structure defects, beyond the one the judge check found: RBC section I, a three-line
+  section-D heading, the enacting formula filed under a contents line, and the inserted paragraphs 105A (RBC) and
+  11A (KYC Annex I).
+
 ## 2026-11-24 — Spec 0004: judge hand check (A6)
 
 - The owner delegated the 10-judgement hand check to Claude (`claude-opus-5-5`). Agreement with the Haiku judge:
