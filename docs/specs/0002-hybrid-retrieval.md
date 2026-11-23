@@ -1,6 +1,6 @@
 # Spec 0002 — Hybrid retrieval and `GET /search`
 
-> Status: **Draft — awaiting owner approval** · Created: 2026-11-23 · Owner: @Akus0ni
+> Status: **Approved (PR #7, 2026-11-23) · Implemented in `feat/0002-hybrid-retrieval`** · Created: 2026-11-23 · Owner: @Akus0ni
 > Depends on: spec 0001 (chunks, embeddings, `tsv`) · Blocked by open questions: none (Q3 stays open for spec 0005)
 > Sprint phase: D1·3
 
@@ -61,7 +61,7 @@ Proposed by this spec — **confirm by approving the spec PR**, or say which to 
 ## 3. Scope
 
 **In scope:** migration 002; citation parsing; hybrid SQL with RRF; reference lookup; the search use case;
-`RegLens.Api` with `GET /search` on `127.0.0.1:5080`; model warm-up; keyword-only fallback; tests; latency
+`RegLens.Api` with `GET /search` on `127.0.0.1:5180`; model warm-up; keyword-only fallback; tests; latency
 measurement.
 
 **Out of scope:** API key, rate limiting, health checks, DB roles, OpenTelemetry export (spec 0005); answers with
@@ -103,7 +103,7 @@ citations and caching (spec 0003); document filters (D30); reranking; tuning `ef
 
 | ID | Requirement |
 |----|-------------|
-| R2.11 | `RegLens.Api` (ASP.NET Core minimal API, composition root only) listens on `http://127.0.0.1:5080` by default |
+| R2.11 | `RegLens.Api` (ASP.NET Core minimal API, composition root only) listens on `http://127.0.0.1:5180` by default |
 | R2.12 | `GET /search?q=<text>&topK=<n>` returns `{ query, degraded, hits: [ { chunkId, documentId, documentTitle, paraRef, heading, pageStart, pageEnd, excerpt, denseRank, keywordRank, fusedScore, pinned } ] }` as JSON (camelCase) |
 | R2.13 | Invalid `q` or `topK` (P7, P9) returns HTTP 400 `application/problem+json` naming the parameter |
 | R2.14 | At startup the API embeds one fixed warm-up string in the background (P6), logging success or failure; startup never waits for or fails on it |
@@ -163,7 +163,7 @@ New packages: none beyond ASP.NET Core (shared framework) and, for tests, `Micro
 |---|-------|-----|
 | A1 | Solution builds with zero warnings | `dotnet build RegLens.slnx` |
 | A2 | All tests pass: citation parser, merge/pinning/degradation (substitutes), SQL ranks and fusion on a pgvector container with known vectors, migration 002, `/search` 400s and JSON shape | `dotnet test` |
-| A3 | `q=Rule 7` → DPDP `Rule 7` is the first hit, `pinned: true` | `curl "http://127.0.0.1:5080/search?q=Rule%207"` |
+| A3 | `q=Rule 7` → DPDP `Rule 7` is the first hit, `pinned: true` | `curl "http://127.0.0.1:5180/search?q=Rule%207"` |
 | A4 | `q=para 6 digital lending` → a `Para 6` chunk in the top 3 with a keyword rank | curl |
 | A5 | `q=Can a loan app go through the people saved in my phone?` → Credit Facilities `Para 13` (any part) in the top 5, with a dense rank | curl |
 | A6 | `q=When must a personal data breach be reported to the Board?` → DPDP `Rule 7` in the top 3 | curl |
@@ -182,7 +182,34 @@ Record in `docs/project-log.md`: p50 and p95 latency over 20 warm `/search` call
 | Q6 | Set `OLLAMA_KEEP_ALIVE` on your machine (e.g. `24h`) so the embedding model stays loaded between searches? It is a Windows user setting, like `OLLAMA_MODELS` | Nothing; without it, a search after 5 idle minutes waits for a model load (~30 s) |
 | — | Confirm or change P1–P10 by approving or commenting on this PR | Code PR for 0002 |
 
-## 9. Sources (checked 2026-11-23)
+## 9. Changes made while building
+
+| Where | Change | Why |
+|-------|--------|-----|
+| R2.11 | Port **5180**, not 5080 (owner's decision, D31) | 5080 is used by the owner's AgencyOS.Server; the tracker's Day 2 MCP URL now says 5180 |
+| R2.13 | A `topK` that cannot be parsed (`topK=abc`) also returns 400 Problem Details | In Development, minimal APIs threw on binding failures and the exception handler turned that into a 500; `RouteHandlerOptions.ThrowOnBadRequest = false` |
+| A5 | **Fails as written** (see §10) | Para 13 is dense rank 3 but fused rank 21: OR-matched common words ("loan", "app") put other chunks in both lists, and RRF favours chunks in both. `ts_rank_cd` has no IDF. Decision left to the owner |
+| A7 | Passes, but a degraded search took 12.3 s | The standard resilience handler retries the unreachable Ollama before giving up; a fail-fast path is a follow-up |
+
+## 10. Results (2026-11-23, live API on the 389-chunk corpus, nomic-embed-text:latest)
+
+| # | Result |
+|---|--------|
+| A1 | 0 warnings, 0 errors |
+| A2 | 108 tests pass (42 new: citation parser, merge/pinning/degradation, SQL ranking on pgvector, `/search` endpoint) |
+| A3 | `Rule 7` → DPDP **Rule 7 first, pinned** |
+| A4 | `para 6 digital lending` → Credit Facilities **Para 6 first** (dense 1, keyword 2), KYC Para 6 second (both pinned) |
+| A5 | ✗ Credit Facilities Para 13 is **dense rank 3** but **fused rank 21**; top 5 are Paras 56, 7, 51, 25, 34 |
+| A6 | Breach question → DPDP **Rule 7 first** (dense 1, keyword 1) |
+| A7 | Ollama unreachable → HTTP 200, `degraded: "vector search unavailable"`, Rule 7 first by keyword rank; 12.3 s |
+| A8 | Empty, 501 chars, `topK=0`, `topK=21` (and `topK=abc`) → HTTP 400 `application/problem+json` |
+| Latency | 20 warm searches: **p50 66 ms, p95 78 ms** (min 55, max 82) |
+
+Why A5 fails, measured: "loan" appears in 66 of 389 chunks (17%), "phone" in 2 (0.5%, one of them Para 13). Dropping
+words found in more than 10% of chunks did not bring Para 13 into the keyword top 5. A principled fix is IDF weighting
+on the keyword side (BM25-style), which belongs with the golden-set evals in spec 0004 rather than tuned on one query.
+
+## 11. Sources (checked 2026-11-23)
 
 - pgvector README: `<=>` is cosine distance; `hnsw.ef_search` default 40; "filtering is applied *after* the index is
   scanned"; iterative index scans — https://github.com/pgvector/pgvector (installed: pgvector 0.8.7)

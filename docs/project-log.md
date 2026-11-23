@@ -2,6 +2,18 @@
 
 Newest first. What was done, why, and the problems hit.
 
+## 2026-11-23 — Spec 0002: hybrid retrieval built
+
+- `RegLens.Api` with `GET /search`, migration 002 (heading + para_ref in `tsv`), citation lookup, keyword-only
+  fallback, model warm-up. Port moved to 5180 (D31): the owner's AgencyOS.Server holds 5080.
+- **Results** (spec 0002 §10): A3, A4, A6, A7, A8 pass. **A5 fails**: Credit Facilities Para 13 is dense rank 3 but
+  fused rank 21, because OR-matched common words put other chunks in both lists and `ts_rank_cd` has no IDF.
+  Left to the owner; candidate fix is IDF weighting, evaluated in spec 0004.
+- Latency, 20 warm searches: p50 66 ms, p95 78 ms. Degraded search (Ollama unreachable): 12.3 s, from retries.
+- Problems hit: `topK=abc` returned 500 in Development (binding exception through the exception handler); fixed with
+  `ThrowOnBadRequest = false`. The cleanup script was O(lines) `git show` calls; fixed in #6.
+- Tests: 108 (42 new).
+
 ## 2026-11-23 — Spec 0001: ingestion built
 
 - Clean-architecture solution (D22), InvoiceGen conventions (D25), `docker-compose.yml` (D26), versioned SQL

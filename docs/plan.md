@@ -46,6 +46,7 @@ product features for compliance.
 | D28 | Citations in a query ("Rule 7", "para 6") are looked up exactly and shown first; `para_ref` and `heading` join the keyword index (spec 0002) | Owner | 2026-11-23 |
 | D29 | Every search hit carries its dense rank, keyword rank and fused score (spec 0002) | Owner | 2026-11-23 |
 | D30 | No document filter in spec 0002; a filter gets its own spec using pgvector iterative scans | Owner | 2026-11-23 |
+| D31 | `RegLens.Api` listens on 127.0.0.1:**5180** (5080 belongs to the owner's AgencyOS.Server) | Owner | 2026-11-23 |
 
 ## 3. Open questions
 
