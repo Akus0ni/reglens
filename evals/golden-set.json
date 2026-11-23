@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "created": "2026-11-23",
+  "status": "draft: every row needs the owner's review (spec 0004, D42)",
+  "matching": "An expected reference matches a chunk when para_ref equals it or starts with it followed by ',' (\"Para 13\" matches \"Para 13, part 1 of 2\", never \"Para 130\"), within the named document.",
+  "questions": [
+    {
+      "id": "kyc-01", "answerable": true, "kind": "direct",
+      "question": "What extra steps must an NBFC take before opening an account for a politically exposed person?",
+      "expected": [{ "document": "rbi-nbfc-kyc-2025", "refs": ["Para 45"] }]
+    },
+    {
+      "id": "kyc-02", "answerable": true, "kind": "direct",
+      "question": "How often must an NBFC review the risk categorisation of its customers' accounts?",
+      "expected": [{ "document": "rbi-nbfc-kyc-2025", "refs": ["Para 41"] }]
+    },
+    {
+      "id": "kyc-03", "answerable": true, "kind": "direct",
+      "question": "What is the Principal Officer responsible for under the KYC Directions?",
+      "expected": [{ "document": "rbi-nbfc-kyc-2025", "refs": ["Para 15"] }]
+    },
+    {
+      "id": "kyc-04", "answerable": true, "kind": "direct",
+      "question": "For how long must an NBFC preserve records of customer identification?",
+      "expected": [{ "document": "rbi-nbfc-kyc-2025", "refs": ["Para 47"] }]
+    },
+    {
+      "id": "kyc-05", "answerable": true, "kind": "direct",
+      "question": "How must an NBFC carry out the digital KYC process?",
+      "expected": [{ "document": "rbi-nbfc-kyc-2025", "refs": ["Para 24"] }]
+    },
+    {
+      "id": "kyc-06", "answerable": true, "kind": "paraphrase",
+      "question": "My lender put me in the high-risk group. How often will they redo my KYC?",
+      "expected": [{ "document": "rbi-nbfc-kyc-2025", "refs": ["Para 42"] }]
+    },
+    {
+      "id": "cf-01", "answerable": true, "kind": "paraphrase",
+      "question": "Can a loan app go through the people saved in my phone?",
+      "expected": [{ "document": "rbi-nbfc-credit-facilities-2025", "refs": ["Para 13"] }],
+      "notes": "Spec 0002's A5 question; measures the BM25 change (D40)."
+    },
+    {
+      "id": "cf-02", "answerable": true, "kind": "direct",
+      "question": "What is the cooling-off period for digital loans?",
+      "expected": [{ "document": "rbi-nbfc-credit-facilities-2025", "refs": ["Para 11"] }]
+    },
+    {
+      "id": "cf-03", "answerable": true, "kind": "direct",
+      "question": "Who handles complaints about digital lending, and what must the lender do about them?",
+      "expected": [{ "document": "rbi-nbfc-credit-facilities-2025", "refs": ["Para 12"] }]
+    },
+    {
+      "id": "cf-04", "answerable": true, "kind": "citation",
+      "question": "What does para 18 of the Credit Facilities Directions require?",
+      "expected": [{ "document": "rbi-nbfc-credit-facilities-2025", "refs": ["Para 18"] }],
+      "notes": "KYC also has a Para 18; both are pinned. Tests that the right document's paragraph is used."
+    },
+    {
+      "id": "cf-05", "answerable": true, "kind": "paraphrase",
+      "question": "What checks must an NBFC do before it partners with a lending service provider?",
+      "expected": [{ "document": "rbi-nbfc-credit-facilities-2025", "refs": ["Para 6"] }]
+    },
+    {
+      "id": "dpdp-01", "answerable": true, "kind": "paraphrase",
+      "question": "If a company's customer database is hacked, who must it tell and how quickly?",
+      "expected": [{ "document": "dpdp-rules-2025", "refs": ["Rule 7"] }]
+    },
+    {
+      "id": "dpdp-02", "answerable": true, "kind": "direct",
+      "question": "What must a notice from a Data Fiduciary to a Data Principal contain?",
+      "expected": [{ "document": "dpdp-rules-2025", "refs": ["Rule 3"] }]
+    },
+    {
+      "id": "dpdp-03", "answerable": true, "kind": "direct",
+      "question": "What security safeguards must a Data Fiduciary put in place to protect personal data?",
+      "expected": [{ "document": "dpdp-rules-2025", "refs": ["Rule 6"] }]
+    },
+    {
+      "id": "dpdp-04", "answerable": true, "kind": "direct",
+      "question": "When is a purpose deemed no longer served, so that personal data must be erased?",
+      "expected": [{ "document": "dpdp-rules-2025", "refs": ["Rule 8", "Third Schedule"] }]
+    },
+    {
+      "id": "dpdp-05", "answerable": true, "kind": "direct",
+      "question": "How must a Data Fiduciary get consent before processing a child's personal data?",
+      "expected": [{ "document": "dpdp-rules-2025", "refs": ["Rule 10"] }]
+    },
+    {
+      "id": "rbc-01", "answerable": true, "kind": "direct",
+      "question": "What must a Key Fact Statement contain?",
+      "expected": [{ "document": "rbi-nbfc-responsible-business-conduct-2025", "refs": ["Para 29", "Annex I"] }],
+      "notes": "Abstained in spec 0003 because this document was missing (Q7)."
+    },
+    {
+      "id": "rbc-02", "answerable": true, "kind": "paraphrase",
+      "question": "Can an NBFC add penal interest to my loan's interest rate when I miss a payment?",
+      "expected": [{ "document": "rbi-nbfc-responsible-business-conduct-2025", "refs": ["Para 30"] }]
+    },
+    {
+      "id": "rbc-03", "answerable": true, "kind": "paraphrase",
+      "question": "Can a recovery agent call me late at night about an overdue loan?",
+      "expected": [{ "document": "rbi-nbfc-responsible-business-conduct-2025", "refs": ["Para 100"] }]
+    },
+    {
+      "id": "rbc-04", "answerable": true, "kind": "direct",
+      "question": "What compensation is due if an NBFC delays returning my property documents after I repay the loan?",
+      "expected": [{ "document": "rbi-nbfc-responsible-business-conduct-2025", "refs": ["Para 39"] }]
+    },
+    { "id": "out-01", "answerable": false, "kind": "out-of-domain", "question": "What is the GST rate on gold jewellery?" },
+    { "id": "out-02", "answerable": false, "kind": "out-of-domain", "question": "How do I file my income tax return?" },
+    { "id": "out-03", "answerable": false, "kind": "out-of-domain", "question": "Who won the cricket world cup?" },
+    { "id": "out-04", "answerable": false, "kind": "near-miss", "question": "What is the current repo rate?", "notes": "RBI, but monetary policy, not these directions" },
+    { "id": "out-05", "answerable": false, "kind": "near-miss", "question": "What are SEBI's rules for mutual fund distributors?" },
+    { "id": "out-06", "answerable": false, "kind": "near-miss", "question": "Up to what amount are bank deposits insured by DICGC?" },
+    { "id": "out-07", "answerable": false, "kind": "near-miss", "question": "Within how many days must an insurer settle a health insurance claim?" },
+    { "id": "out-08", "answerable": false, "kind": "near-miss", "question": "How much home loan interest can I deduct from my taxable income?", "notes": "Lending-related, but income tax law" },
+    { "id": "out-09", "answerable": false, "kind": "near-miss", "question": "Does a crypto exchange need to register with the Financial Intelligence Unit in India?", "notes": "PML-adjacent, but not in these documents" },
+    { "id": "out-10", "answerable": false, "kind": "near-miss", "question": "What compensation does a builder owe for delayed possession of a flat under RERA?", "notes": "Shares 'compensation for delay' wording with RBC Para 39" }
+  ]
+}
