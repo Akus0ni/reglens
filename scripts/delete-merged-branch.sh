@@ -14,13 +14,18 @@ git pull -q --ff-only
 git fetch -q --prune
 
 base=$(git merge-base main "$branch")
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
 missing=0
+# One pass per file: added lines that do not appear anywhere in main's copy of that file.
 while IFS= read -r file; do
   git cat-file -e "main:$file" 2>/dev/null || { echo "Missing on main: $file" >&2; missing=1; continue; }
-  while IFS= read -r line; do
-    [ -z "$line" ] && continue
-    git show "main:$file" | grep -qxF -- "$line" || { echo "Not on main ($file): ${line:0:100}" >&2; missing=1; }
-  done < <(git diff "$base" "$branch" -- "$file" | grep '^+' | grep -v '^+++' | sed 's/^+//')
+  git show "main:$file" > "$work/main"
+  git diff "$base" "$branch" -- "$file" | grep '^+' | grep -v '^+++' | sed 's/^+//' | grep -v '^$' > "$work/added" || true
+  if grep -vxFf "$work/main" "$work/added" > "$work/absent"; then
+    sed "s|^|Not on main ($file): |" "$work/absent" | cut -c1-160 >&2
+    missing=1
+  fi
 done < <(git diff --name-only --diff-filter=AM "$base" "$branch")
 
 [ "$missing" -eq 0 ] || { echo "$branch has work that is not on main. Not deleting; ask the owner." >&2; exit 1; }
