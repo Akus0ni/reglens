@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.DependencyInjection;
 using RegLens.Application.Answers;
@@ -26,6 +27,13 @@ public sealed class RedisHybridCacheTests : IAsyncLifetime
         await using (var first = Provider(_redis.GetConnectionString()))
         {
             await Cache(first).GetOrCreateAsync("answer:test", _ => ValueTask.FromResult(answer), cancellationToken: Ct);
+
+            // HybridCache writes the second level in the background; wait until the entry is in Redis.
+            var redis = first.GetRequiredService<IDistributedCache>();
+            for (var attempt = 0; attempt < 50 && await redis.GetAsync("answer:test", Ct) is null; attempt++)
+            {
+                await Task.Delay(100, Ct);
+            }
         }
 
         // A new provider has an empty memory cache, like a restarted API.

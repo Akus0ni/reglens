@@ -23,8 +23,11 @@ public sealed partial class SearchRegulations(
         ArgumentOutOfRangeException.ThrowIfLessThan(topK, 1);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(topK, _options.MaxTopK);
 
-        var embedding = await EmbedAsync(question, cancellationToken).ConfigureAwait(false);
-        var query = new SearchQuery(question, embedding.Vector, _options.CandidatesPerSide, topK);
+        var embedding = _options.Mode == SearchMode.KeywordOnly
+            ? new QueryEmbedding(ReadOnlyMemory<float>.Empty, null)
+            : await EmbedAsync(question, cancellationToken).ConfigureAwait(false);
+        var query = new SearchQuery(question, embedding.Vector, _options.CandidatesPerSide, topK,
+            _options.KeywordScoring, UseKeywords: _options.Mode != SearchMode.DenseOnly);
         var citations = CitationQuery.Parse(question);
 
         var ranked = await search.HybridAsync(query, cancellationToken).ConfigureAwait(false);

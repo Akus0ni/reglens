@@ -5,9 +5,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project status
 
 RegLens is a .NET 10 API that answers questions about Indian NBFC regulation with verified citations and exposes
-itself as an MCP server. **Built so far: spec 0001 ingestion, spec 0002 hybrid retrieval** (`GET /search`) **and
-spec 0003 answers** (`POST /ask`). Next: spec 0004, golden set and evals. Plan, decisions (D*n*) and open questions
-(Q*n*): `docs/plan.md`. Specs: `docs/specs/`. History: `docs/project-log.md`.
+itself as an MCP server. **Built so far: specs 0001 ingestion, 0002 hybrid retrieval** (`GET /search`), **0003
+answers** (`POST /ask`) **and 0004 evals** (golden set, BM25). Next: spec 0005, contextual retrieval. Plan, decisions
+(D*n*) and open questions (Q*n*): `docs/plan.md`. Specs: `docs/specs/`. History: `docs/project-log.md`.
 
 ## Workflow — read first
 
@@ -42,6 +42,12 @@ dotnet user-secrets set "ConnectionStrings:RegLens" "<same as above>" --project 
 dotnet run --project src/RegLens.Api              # http://127.0.0.1:5180 (5080 is the owner's AgencyOS)
 curl "http://127.0.0.1:5180/search?q=Rule%207&topK=5"
 curl -X POST http://127.0.0.1:5180/ask -H "Content-Type: application/json" -d '{"question":"When must a breach be reported to the Board?"}'
+
+dotnet run --project src/RegLens.Evals -- retrieval --config hybrid-bm25     # free: recall@5/@8, MRR@10 (n = 20)
+dotnet run --project src/RegLens.Evals -- floor --config hybrid-bm25         # D48 floor from the latest retrieval run
+dotnet run --project src/RegLens.Evals -- answers --config hybrid-bm25 --confirm-spend  # ~$0.5, writes judge-check.md
+dotnet run --project src/RegLens.Evals -- probe --confirm-spend               # prompt-injection probe, ~$0.01
+                                                  # configs: dense, keyword-tsrank, keyword-bm25, hybrid-tsrank, hybrid-bm25
 
 ./scripts/protect-main.ps1                        # (re)apply the main ruleset; needs gh logged in as the owner
 scripts/delete-merged-branch.sh <branch> <pr>     # after the owner merges a PR
@@ -79,7 +85,9 @@ PdfPig, OllamaSharp, Anthropic SDK, HybridCache + Redis, manifest) ← hosts `Re
   keyword-only with `degraded` if Ollama fails) → `PostgresChunkSearch` runs one SQL statement: pgvector top-40 and
   full-text top-40 (OR of the question's lexemes; `tsv` covers context, heading, para_ref and content) fused with
   RRF k = 60 → citations in the question ("Rule 7", "para 6") are looked up exactly and pinned first. Every hit
-  carries dense rank, keyword rank and fused score. The keyword side has no IDF yet (spec 0002 §10).
+  carries dense rank, keyword rank, fused score and similarity. The keyword side ranks by BM25 computed in SQL from
+  materialized views (`lexeme_stats`, `chunk_lengths`, `corpus_stats`) that ingestion refreshes (spec 0004, D49);
+  `Search:Mode` and `Search:KeywordScoring` switch configurations for evals.
 - **Ask** (built, spec 0003, `POST /ask`): `AnswerQuestion` looks up HybridCache (L1 memory, L2 Redis; key =
   prompt version + model + effort + index version + topK + sha256 of the normalised question) → `SearchRegulations`
   → abstain without a Claude call if the best `similarity` < 0.55 and nothing is pinned → full passages to
@@ -89,7 +97,9 @@ PdfPig, OllamaSharp, Anthropic SDK, HybridCache + Redis, manifest) ← hosts `Re
   are not cached. `AnthropicFailureTranslation` maps SDK outages to 503; truncated or unparsable output is 502.
   `GET /search` and the MCP `search_regulations` tool stop after retrieval and never call Anthropic.
 - **MCP** (planned, `/mcp`): read-only tools over the same services, consumed by the Day 2 Python agent (separate repo).
-- **Evals** (planned): golden set + retrieval metrics (no LLM) + Haiku-judged groundedness/relevance; numbers go to
-  `evals/results.md` with n, date and model IDs.
+- **Evals** (built, spec 0004): `evals/golden-set.json` (owner-reviewed) → `src/RegLens.Evals` (third composition
+  root; never in `dotnet test`; paid commands need `--confirm-spend`; no Redis, so every answer is really asked) →
+  raw runs in `evals/runs/`, generated `evals/results.md`, `evals/judge-check.md` for the owner. The Haiku judge
+  goes through `DropTopP` because Claude 4.x rejects temperature plus top_p.
 - Model-call boundary to keep: Ollama only makes vectors; Anthropic only reads and writes text; Postgres never calls
   a model.

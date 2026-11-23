@@ -50,6 +50,18 @@ public class IngestCorpusTests
     }
 
     [Fact]
+    public async Task RefreshesKeywordStatisticsOnlyWhenSomethingWasWritten()
+    {
+        StoredState(StoredDocumentState.Current);
+        await Run();
+        await _store.DidNotReceiveWithAnyArgs().RefreshSearchStatisticsAsync(TestContext.Current.CancellationToken);
+
+        StoredState(StoredDocumentState.Missing);
+        await Run();
+        await _store.Received(1).RefreshSearchStatisticsAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
     public async Task IngestsANewDocument()
     {
         StoredState(StoredDocumentState.Missing);

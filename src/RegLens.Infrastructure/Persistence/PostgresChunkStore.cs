@@ -98,4 +98,16 @@ public sealed class PostgresChunkStore(NpgsqlDataSource dataSource) : IChunkStor
 
         await batch.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
     }
+
+    public async Task RefreshSearchStatisticsAsync(CancellationToken cancellationToken)
+    {
+        // CONCURRENTLY keeps the views readable by the API while they refresh; it needs their unique indexes.
+        // chunk_lengths before corpus_stats, which is computed from it.
+        await using var command = dataSource.CreateCommand("""
+            REFRESH MATERIALIZED VIEW CONCURRENTLY lexeme_stats;
+            REFRESH MATERIALIZED VIEW CONCURRENTLY chunk_lengths;
+            REFRESH MATERIALIZED VIEW CONCURRENTLY corpus_stats;
+            """);
+        await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+    }
 }

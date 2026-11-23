@@ -1,0 +1,838 @@
+{
+  "info": {
+    "kind": "answers",
+    "config": "hybrid-bm25",
+    "startedUtc": "2026-11-23T18:25:43.3465788+00:00",
+    "commit": "063f759-dirty",
+    "embeddingModel": "nomic-embed-text",
+    "goldenSetVersion": "1"
+  },
+  "model": "claude-sonnet-5-5",
+  "effort": "Medium",
+  "judgeModel": "claude-haiku-4-5",
+  "similarityFloor": 0.6,
+  "n": 30,
+  "unanswerableAbstained": 10,
+  "answerableAbstained": 2,
+  "answeredAnswerable": 18,
+  "answeredCitingExpected": 17,
+  "citationsDropped": 0,
+  "groundednessMean": 4.888888888888889,
+  "relevanceMean": 4.333333333333333,
+  "judgeFailures": 0,
+  "inputTokens": 109449,
+  "outputTokens": 11282,
+  "judgeInputTokens": 0,
+  "judgeOutputTokens": 0,
+  "costUsd": 0.331718,
+  "latencyP50Ms": 4341.5911,
+  "questions": [
+    {
+      "id": "kyc-01",
+      "answerable": true,
+      "question": "What extra steps must an NBFC take before opening an account for a politically exposed person?",
+      "abstained": false,
+      "abstainReason": null,
+      "answer": "Besides normal customer due diligence, an NBFC that opens an account for a PEP must have risk management systems to determine whether the customer or beneficial owner is a PEP, take reasonable measures to establish the source of funds or wealth, and get senior management approval to open the account. It must also subject the account to enhanced ongoing monitoring. If an existing customer later becomes a PEP, it needs senior management approval to continue the relationship. These steps also apply to family members and close associates of PEPs.",
+      "missingInfo": "",
+      "citedRefs": [
+        "rbi-nbfc-kyc-2025 Para 45",
+        "rbi-nbfc-kyc-2025 Para 45",
+        "rbi-nbfc-kyc-2025 Para 45",
+        "rbi-nbfc-kyc-2025 Para 45",
+        "rbi-nbfc-kyc-2025 Para 45",
+        "rbi-nbfc-kyc-2025 Para 45"
+      ],
+      "citesExpected": true,
+      "droppedCitations": 0,
+      "inputTokens": 4499,
+      "outputTokens": 488,
+      "latencyMs": 6883.107,
+      "judgements": [
+        {
+          "metric": "Groundedness",
+          "score": 5,
+          "reason": "The response thoroughly and accurately addresses the query by directly citing all five extra steps an NBFC must take when opening accounts for PEPs as outlined in Para 45(1) of the RBI Directions. It includes risk management systems, source of funds verification, senior management approval, enhanced ongoing monitoring, and the requirement for approval if an existing customer becomes a PEP. The response also correctly notes that these requirements extend to family members and close associates. All information is accurate, well-sourced from the provided context, and contains no extraneous or contradictory information.",
+          "failed": false
+        },
+        {
+          "metric": "Relevance",
+          "score": 4,
+          "reason": "The response directly addresses the query by outlining all major extra steps NBFCs must take for PEPs: risk management systems, source of funds verification, senior management approval, enhanced monitoring, and application to related parties. The information is accurate and complete without extraneous details. However, it doesn\u0027t provide additional insights, context, or implications that would elevate it to a comprehensive level\u2014it delivers exactly what was asked for without elaboration.",
+          "failed": false
+        }
+      ]
+    },
+    {
+      "id": "kyc-02",
+      "answerable": true,
+      "question": "How often must an NBFC review the risk categorisation of its customers\u0027 accounts?",
+      "abstained": false,
+      "abstainReason": null,
+      "answer": "An NBFC must have a system of periodic review of the risk categorisation of accounts, with the review done at least once in every six months.",
+      "missingInfo": "",
+      "citedRefs": [
+        "rbi-nbfc-kyc-2025 Para 41"
+      ],
+      "citesExpected": true,
+      "droppedCitations": 0,
+      "inputTokens": 3718,
+      "outputTokens": 148,
+      "latencyMs": 2569.9767,
+      "judgements": [
+        {
+          "metric": "Groundedness",
+          "score": 5,
+          "reason": "The response directly and accurately answers the query by citing the specific requirement from Para 41(1) of the context. It states that NBFCs must review risk categorisation at least once every six months, which is the exact information provided in the source material. The answer is precise, relevant, complete, and contains no inaccuracies or extraneous information.",
+          "failed": false
+        },
+        {
+          "metric": "Relevance",
+          "score": 4,
+          "reason": "The response directly and accurately answers the query by providing the specific frequency requirement (at least once every six months) for NBFC risk categorisation review. It includes all essential information needed to fully understand the regulatory requirement without extraneous details. However, it does not provide additional context, implications, or elaboration that would elevate it to a comprehensive response with insights.",
+          "failed": false
+        }
+      ]
+    },
+    {
+      "id": "kyc-03",
+      "answerable": true,
+      "question": "What is the Principal Officer responsible for under the KYC Directions?",
+      "abstained": false,
+      "abstainReason": null,
+      "answer": "The Principal Officer is responsible for ensuring compliance, monitoring transactions, and sharing and reporting information as required under the law and regulations. The NBFC must also tell FIU-IND and the RBI the Principal Officer\u0027s name, designation, address and contact details.",
+      "missingInfo": "",
+      "citedRefs": [
+        "rbi-nbfc-kyc-2025 Para 15",
+        "rbi-nbfc-kyc-2025 Para 15"
+      ],
+      "citesExpected": true,
+      "droppedCitations": 0,
+      "inputTokens": 4437,
+      "outputTokens": 247,
+      "latencyMs": 2857.3423,
+      "judgements": [
+        {
+          "metric": "Groundedness",
+          "score": 5,
+          "reason": "The response is fully correct and complete. It directly addresses the query by extracting and presenting all the responsibilities of the Principal Officer as defined in Para 15 of the RBI KYC Directions. The assistant accurately captured both subsections: the core responsibilities (compliance, monitoring, reporting) and the administrative requirement for communicating the Principal Officer\u0027s details to regulatory authorities. No information is missing, inaccurate, or extraneous.",
+          "failed": false
+        },
+        {
+          "metric": "Relevance",
+          "score": 4,
+          "reason": "The response directly addresses the query about Principal Officer responsibilities under KYC Directions by identifying three core responsibilities: ensuring compliance, monitoring transactions, and sharing/reporting information. The information provided is accurate and covers the essential duties. However, the response lacks comprehensive elaboration on all specific responsibilities that might be outlined in detailed KYC Directions and doesn\u0027t provide context or significance beyond the basic statement of duties. The added information about reporting officer details to FIU-IND and RBI, while relevant, is supplementary rather than enhancing the core answer.",
+          "failed": false
+        }
+      ]
+    },
+    {
+      "id": "kyc-04",
+      "answerable": true,
+      "question": "For how long must an NBFC preserve records of customer identification?",
+      "abstained": false,
+      "abstainReason": null,
+      "answer": "An NBFC must preserve records of customer identification and addresses, obtained when opening the account and during the business relationship, for at least five years after the business relationship has ended.",
+      "missingInfo": "",
+      "citedRefs": [
+        "rbi-nbfc-kyc-2025 Para 47"
+      ],
+      "citesExpected": true,
+      "droppedCitations": 0,
+      "inputTokens": 5217,
+      "outputTokens": 161,
+      "latencyMs": 2030.7926,
+      "judgements": [
+        {
+          "metric": "Groundedness",
+          "score": 5,
+          "reason": "The response is a comprehensive and accurate answer to the query. It directly quotes and paraphrases the key provision from Para 47(2) of the RBI Directions, providing the exact timeframe (at least five years after the business relationship has ended) along with the scope of records (customer identification and addresses obtained during account opening and business relationship). The response fully addresses the question without introducing incorrect information or missing critical details.",
+          "failed": false
+        },
+        {
+          "metric": "Relevance",
+          "score": 4,
+          "reason": "The response directly and completely addresses the query by providing the specific retention period (five years), the timing reference point (after business relationship ends), and relevant scope details (identification and addresses, from account opening through the relationship). The answer is factually accurate, comprehensive, and includes all essential information needed to understand the NBFC\u0027s record-keeping obligation without extraneous details. This constitutes a complete response without additional insights or implications.",
+          "failed": false
+        }
+      ]
+    },
+    {
+      "id": "kyc-05",
+      "answerable": true,
+      "question": "How must an NBFC carry out the digital KYC process?",
+      "abstained": false,
+      "abstainReason": null,
+      "answer": "Based on the passages provided, an NBFC must build its own digital KYC application, make it available at customer touch points, and do KYC only through that application. It must control access so that only authorised officials can use it, through a login-id and password or a Live OTP or Time OTP mechanism. The customer and the authorised official meet in person, and the customer holds the original OVD. The official takes a live photograph of the customer and embeds it in the Customer Application Form (CAF). The application must watermark the photo with the CAF number, GPS coordinates, official\u0027s name, employee code, date and time. It must capture only a live photograph, against a white background with no other person in the frame. After successful verification, the authorised officer digitally signs the CAF, prints it, and gets the customer\u0027s signature or thumb impression. The officer then scans and uploads it, and the original hard copy may be returned to the customer. The passages provided do not include the middle steps (paragraph 24 sub-clauses 6 to 12 and the first part of the verification checks), so this is only a partial answer.",
+      "missingInfo": "Paragraph 24 sub-clauses (6) to (12) and the opening verification condition (i) are not in the passages, so the steps on capturing the OVD or Aadhaar document, the customer\u0027s details, the OTP sent to the customer\u0027s mobile number, and the verification checks are not covered.",
+      "citedRefs": [
+        "rbi-nbfc-kyc-2025 Para 24, part 1 of 4",
+        "rbi-nbfc-kyc-2025 Para 24, part 1 of 4",
+        "rbi-nbfc-kyc-2025 Para 24, part 1 of 4",
+        "rbi-nbfc-kyc-2025 Para 24, part 1 of 4",
+        "rbi-nbfc-kyc-2025 Para 24, part 1 of 4",
+        "rbi-nbfc-kyc-2025 Para 24, part 4 of 4"
+      ],
+      "citesExpected": true,
+      "droppedCitations": 0,
+      "inputTokens": 5409,
+      "outputTokens": 871,
+      "latencyMs": 7118.6297,
+      "judgements": [
+        {
+          "metric": "Groundedness",
+          "score": 4,
+          "reason": "The response is highly accurate and directly addresses the query with specific details from the provided context. All major steps of the digital KYC process are correctly explained with proper grounding in Para 24 (parts 1, 4, 5, and 13). The assistant demonstrates strong understanding and provides concrete procedural details including application requirements, access control, in-person verification, live photography requirements, watermarking specifications, and final documentation procedures. However, the response explicitly acknowledges that it is incomplete due to missing sections (Para 24 sub-clauses 6-12) from the provided context. While this limitation is due to the context provided rather than the assistant\u0027s error, it prevents the response from achieving a perfect \u00225\u0022 score. The response merits a \u00224\u0022 as it provides a substantially correct and detailed answer with clear acknowledgment of what\u0027s missing.",
+          "failed": false
+        },
+        {
+          "metric": "Relevance",
+          "score": 4,
+          "reason": "The response directly and accurately addresses the query about NBFC digital KYC procedures with specific, detailed steps drawn from the provided passages. The information is accurate and covers the main procedural requirements including application building, access controls, photography specifications, watermarking, verification, digital signing, and document handling. While the response explicitly acknowledges that some source material sections are missing from the passages (sub-clauses 6-12 and verification checks), this transparency demonstrates awareness of completeness rather than indicating factual errors. The response provides sufficient detail for understanding the core process based on available information.",
+          "failed": false
+        }
+      ]
+    },
+    {
+      "id": "kyc-06",
+      "answerable": true,
+      "question": "My lender put me in the high-risk group. How often will they redo my KYC?",
+      "abstained": false,
+      "abstainReason": null,
+      "answer": "For high-risk customers, the NBFC must carry out periodic KYC updation at least once every two years, counted from account opening or the last KYC updation. Separately, the NBFC must review the risk categorisation of accounts at least once every six months. That review is not a KYC redo. The NBFC\u0027s own policy may set a more frequent updation schedule than the minimum.",
+      "missingInfo": "Your lender\u0027s own internal policy is not in the passages, so they cannot say whether your lender uses a schedule shorter than two years.",
+      "citedRefs": [
+        "rbi-nbfc-kyc-2025 Para 42, part 1 of 5",
+        "rbi-nbfc-kyc-2025 Para 41",
+        "rbi-nbfc-kyc-2025 Para 42, part 4 of 5"
+      ],
+      "citesExpected": true,
+      "droppedCitations": 0,
+      "inputTokens": 5072,
+      "outputTokens": 413,
+      "latencyMs": 4649.5765,
+      "judgements": [
+        {
+          "metric": "Groundedness",
+          "score": 5,
+          "reason": "The response is fully correct and complete. It directly answers the user\u0027s query with the precise regulatory requirement (periodic KYC updation at least once every two years for high-risk customers), includes helpful clarifications distinguishing between KYC updation and risk categorization reviews, and acknowledges that individual NBFC policies may impose stricter requirements. All information is accurately sourced from the provided context with no inaccuracies or extraneous details.",
+          "failed": false
+        },
+        {
+          "metric": "Relevance",
+          "score": 5,
+          "reason": "The response directly and accurately answers the user\u0027s question about KYC updation frequency for high-risk customers (every 2 years minimum). It provides complete information with helpful clarifications, including the important distinction between KYC updation and risk categorization reviews, and mentions that individual policies may be stricter. This additional context enhances understanding without being extraneous.",
+          "failed": false
+        }
+      ]
+    },
+    {
+      "id": "cf-01",
+      "answerable": true,
+      "question": "Can a loan app go through the people saved in my phone?",
+      "abstained": false,
+      "abstainReason": null,
+      "answer": "Generally no. An NBFC must ensure that its loan app, and the apps of its lending service providers, do not access your contact list. Any data collection must be need-based and have your prior, explicit consent with an audit trail. One-time access is allowed only for camera, microphone, location or similar facilities needed for onboarding or KYC, and only with your explicit consent.",
+      "missingInfo": "",
+      "citedRefs": [
+        "rbi-nbfc-credit-facilities-2025 Para 13",
+        "rbi-nbfc-credit-facilities-2025 Para 13",
+        "rbi-nbfc-credit-facilities-2025 Para 13"
+      ],
+      "citesExpected": true,
+      "droppedCitations": 0,
+      "inputTokens": 2845,
+      "outputTokens": 384,
+      "latencyMs": 3719.1254,
+      "judgements": [
+        {
+          "metric": "Groundedness",
+          "score": 5,
+          "reason": "The response is fully grounded in the context. It directly addresses the user\u0027s question about contact list access with an accurate \u0022no,\u0022 supported by Para 13(1) which explicitly states NBFCs must ensure their apps \u0022desist from accessing mobile phone resources like...contact list.\u0022 The response accurately includes the permitted one-time access exceptions (camera, microphone, location) for onboarding/KYC with explicit consent, all of which are explicitly stated in the context. No incorrect or unsupported information is introduced.",
+          "failed": false
+        },
+        {
+          "metric": "Relevance",
+          "score": 5,
+          "reason": "The response earns a comprehensive score because it not only directly and accurately answers the user\u0027s question (\u0022Generally no\u0022), but also provides valuable regulatory context explaining why this is the case. It elaborates on NBFC obligations, requirements for consent and audit trails, and clarifies what limited access IS permissible. This additional regulatory insight enhances the user\u0027s understanding of the underlying rules governing loan app permissions, going beyond a simple yes/no answer while remaining entirely relevant and proportionate.",
+          "failed": false
+        }
+      ]
+    },
+    {
+      "id": "cf-02",
+      "answerable": true,
+      "question": "What is the cooling-off period for digital loans?",
+      "abstained": false,
+      "abstainReason": null,
+      "answer": "There is no single fixed cooling-off period. Each NBFC sets it in its credit policy, but it cannot be shorter than one day. During this period the borrower must be given an explicit option to exit a digital loan by paying the principal and the proportionate APR, without any penalty. The NBFC may keep a reasonable one-time processing fee if the borrower exits during this period, and it must disclose that fee upfront in the KFS.",
+      "missingInfo": "",
+      "citedRefs": [
+        "rbi-nbfc-credit-facilities-2025 Para 11",
+        "rbi-nbfc-credit-facilities-2025 Para 11",
+        "rbi-nbfc-credit-facilities-2025 Para 11"
+      ],
+      "citesExpected": true,
+      "droppedCitations": 0,
+      "inputTokens": 4762,
+      "outputTokens": 357,
+      "latencyMs": 3932.315,
+      "judgements": [
+        {
+          "metric": "Groundedness",
+          "score": 5,
+          "reason": "The response is fully correct and complete. It accurately addresses all aspects of the cooling-off period requirement mentioned in Para 11 of the RBI Directions 2025, including: the variable nature of the period (determined by NBFC), the minimum one-day requirement, the borrower\u0027s exit option, the prohibition on penalties, and the optional processing fee disclosure requirement. All details are precisely sourced from the provided context, with no inaccuracies, omissions, or extraneous information.",
+          "failed": false
+        },
+        {
+          "metric": "Relevance",
+          "score": 5,
+          "reason": "The response comprehensively addresses the query about cooling-off periods for digital loans. It goes beyond a simple answer by explaining that the period is variable (set by each NBFC) with a minimum floor of one day, and importantly details borrower protections during this period (exit options, fee structures, disclosure requirements). This provides both complete information and regulatory context that enhances understanding of the concept.",
+          "failed": false
+        }
+      ]
+    },
+    {
+      "id": "cf-03",
+      "answerable": true,
+      "question": "Who handles complaints about digital lending, and what must the lender do about them?",
+      "abstained": false,
+      "abstainReason": null,
+      "answer": "The NBFC and any of its LSPs that interface with the borrower must designate nodal grievance redressal officers to handle digital lending complaints. Their contact details must be prominently displayed on the websites of the NBFC and the LSP, on the DLA, and in the KFS. The facility to lodge complaints must also be available on the DLA and those websites, and responsibility for grievance redressal stays with the NBFC. If the NBFC rejects a complaint wholly or partly, the borrower is not satisfied with the reply, or no reply comes within 30 days, the borrower can complain through the RBI\u0027s CMS portal under the Integrated Ombudsman Scheme or send a physical complaint to the RBI\u0027s Centralised Receipt and Processing Centre in Chandigarh. The NBFC must suitably convey this information to the borrower. The NBFC\u0027s own website must also show its customer care and internal grievance redressal details and a link to the RBI\u0027s CMS and Sachet Portal.",
+      "missingInfo": "",
+      "citedRefs": [
+        "rbi-nbfc-credit-facilities-2025 Para 12",
+        "rbi-nbfc-credit-facilities-2025 Para 12",
+        "rbi-nbfc-credit-facilities-2025 Para 12",
+        "rbi-nbfc-credit-facilities-2025 Para 12",
+        "rbi-nbfc-credit-facilities-2025 Para 12",
+        "rbi-nbfc-credit-facilities-2025 Para 9, part 1 of 2",
+        "rbi-nbfc-credit-facilities-2025 Para 9, part 1 of 2"
+      ],
+      "citesExpected": true,
+      "droppedCitations": 0,
+      "inputTokens": 5318,
+      "outputTokens": 1025,
+      "latencyMs": 6739.929,
+      "judgements": [
+        {
+          "metric": "Groundedness",
+          "score": 5,
+          "reason": "The response is fully grounded in the provided context. It accurately and comprehensively answers both aspects of the query: who handles complaints (nodal grievance redressal officers designated by NBFC/LSP) and what lenders must do (designate officers, display contact details, provide complaint facilities, maintain grievance redressal responsibility, escalate to RBI if unresolved, inform borrowers, and display relevant links on website). All information is directly supported by Para 12 and Para 9(4) of the context, with specific details like the 30-day timeframe and Chandigarh address included. No irrelevant or unsupported information is introduced.",
+          "failed": false
+        },
+        {
+          "metric": "Relevance",
+          "score": 4,
+          "reason": "The response comprehensively addresses both components of the query: it clearly identifies who handles complaints (NBFCs and their designated officers with escalation to RBI) and provides detailed, accurate information about what lenders must do (designate officers, display contact details, provide lodging facilities, communicate escalation options, etc.). The response includes all essential details with added context about complaint escalation procedures, demonstrating complete understanding of the regulatory framework without extraneous information.",
+          "failed": false
+        }
+      ]
+    },
+    {
+      "id": "cf-04",
+      "answerable": true,
+      "question": "What does para 18 of the Credit Facilities Directions require?",
+      "abstained": false,
+      "abstainReason": null,
+      "answer": "Para 18 of the Credit Facilities Directions deals with reporting of digital lending apps (DLAs) to the RBI. An NBFC must report all DLAs it deploys or joins, whether its own or those of lending service providers (LSPs), on the RBI\u0027s CIMS portal in the prescribed format. It must update the list when DLAs are added or engagements end. The Chief Compliance Officer or a Board-designated official must certify that the data is correct and that the DLAs comply with the extant regulatory instructions. That official must also certify specific aspects, such as the DLA\u0027s link to the NBFC\u0027s website, a nodal grievance officer for LSP-owned DLAs, compliant data collection and storage, and website disclosure of DLA particulars. The NBFC must ensure the data is correct and timely, because the RBI publishes it without verifying it, and it must deal with customer grievances about DLAs directly. It must also ensure that listing a third-party DLA is not presented as RBI registration, authorization or endorsement.",
+      "missingInfo": "",
+      "citedRefs": [
+        "rbi-nbfc-credit-facilities-2025 Para 18, part 1 of 2",
+        "rbi-nbfc-credit-facilities-2025 Para 18, part 1 of 2",
+        "rbi-nbfc-credit-facilities-2025 Para 18, part 1 of 2",
+        "rbi-nbfc-credit-facilities-2025 Para 18, part 2 of 2",
+        "rbi-nbfc-credit-facilities-2025 Para 18, part 2 of 2",
+        "rbi-nbfc-credit-facilities-2025 Para 18, part 2 of 2"
+      ],
+      "citesExpected": true,
+      "droppedCitations": 0,
+      "inputTokens": 3548,
+      "outputTokens": 968,
+      "latencyMs": 8656.1874,
+      "judgements": [
+        {
+          "metric": "Groundedness",
+          "score": 5,
+          "reason": "The response is fully grounded in the provided context. It accurately and comprehensively addresses Para 18 of the Credit Facilities Directions, covering all six subsections with specific details about DLA reporting requirements, certification obligations, and regulatory compliance. Each statement in the response is directly supported by the context, with no incorrect information or misinterpretations. The response is complete and includes all relevant details necessary to understand the requirements of Para 18.",
+          "failed": false
+        },
+        {
+          "metric": "Relevance",
+          "score": 5,
+          "reason": "The response comprehensively addresses the query by detailing all major requirements of Para 18, including reporting obligations, certification responsibilities, data management, and compliance directives. Beyond providing complete information, it includes relevant contextual details such as the rationale for data accuracy (RBI doesn\u0027t verify) and implications for managing customer relationships and avoiding misrepresentation. The response is well-organized, specific, and directly relevant without extraneous information.",
+          "failed": false
+        }
+      ]
+    },
+    {
+      "id": "cf-05",
+      "answerable": true,
+      "question": "What checks must an NBFC do before it partners with a lending service provider?",
+      "abstained": true,
+      "abstainReason": "model-abstained",
+      "answer": "",
+      "missingInfo": "The due diligence or onboarding requirements for engaging an LSP are missing, for example checks on the LSP\u0027s background, capability, or agreements. The passages cover only how funds may flow.",
+      "citedRefs": [],
+      "citesExpected": false,
+      "droppedCitations": 0,
+      "inputTokens": 2713,
+      "outputTokens": 232,
+      "latencyMs": 5987.8975,
+      "judgements": []
+    },
+    {
+      "id": "dpdp-01",
+      "answerable": true,
+      "question": "If a company\u0027s customer database is hacked, who must it tell and how quickly?",
+      "abstained": true,
+      "abstainReason": "model-abstained",
+      "answer": "",
+      "missingInfo": "The rule on personal data breach notification is missing: who must be notified (for example the Data Protection Board and affected individuals) and the deadline. The provided passages cover only retention, KYC, and related topics.",
+      "citedRefs": [],
+      "citesExpected": false,
+      "droppedCitations": 0,
+      "inputTokens": 4472,
+      "outputTokens": 141,
+      "latencyMs": 6042.4693,
+      "judgements": []
+    },
+    {
+      "id": "dpdp-02",
+      "answerable": true,
+      "question": "What must a notice from a Data Fiduciary to a Data Principal contain?",
+      "abstained": false,
+      "abstainReason": null,
+      "answer": "The notice must be presented and understandable independently of other information from the Data Fiduciary. It must give, in clear and plain language, a fair account of the details needed for specific and informed consent, including at least an itemised description of the personal data and the specified purposes, with a specific description of the goods, services or uses enabled by the processing. It must also give the communication link to the Data Fiduciary\u0027s website or app, and describe other means, if any, to withdraw consent (as easily as it was given), exercise rights under the Act, and complain to the Board.",
+      "missingInfo": "",
+      "citedRefs": [
+        "dpdp-rules-2025 Rule 3",
+        "dpdp-rules-2025 Rule 3",
+        "dpdp-rules-2025 Rule 3",
+        "dpdp-rules-2025 Rule 3",
+        "dpdp-rules-2025 Rule 3",
+        "dpdp-rules-2025 Rule 3",
+        "dpdp-rules-2025 Rule 3"
+      ],
+      "citesExpected": true,
+      "droppedCitations": 0,
+      "inputTokens": 3590,
+      "outputTokens": 575,
+      "latencyMs": 3898.9619,
+      "judgements": [
+        {
+          "metric": "Groundedness",
+          "score": 5,
+          "reason": "The response thoroughly and accurately addresses the query by directly citing and explaining all requirements from Rule 3 of the Digital Personal Data Protection Rules, 2025. It includes all mandatory elements: independent presentability and understandability, clear language with fair account of necessary details, itemised description of personal data, specified purposes and goods/services, communication links, and means to withdraw consent, exercise rights, and lodge complaints. The information is precise, complete, and entirely supported by the provided context with no inaccuracies or irrelevant additions.",
+          "failed": false
+        },
+        {
+          "metric": "Relevance",
+          "score": 4,
+          "reason": "The response comprehensively addresses the query by providing a detailed list of all mandatory elements that must be included in a notice from a Data Fiduciary to a Data Principal. It covers transparency requirements, clarity standards, specific content mandates (personal data description, purposes, services enabled), and procedural elements (withdrawal, rights exercise, complaints). The information appears accurate based on data protection principles and the response is well-organized and complete without extraneous information.",
+          "failed": false
+        }
+      ]
+    },
+    {
+      "id": "dpdp-03",
+      "answerable": true,
+      "question": "What security safeguards must a Data Fiduciary put in place to protect personal data?",
+      "abstained": false,
+      "abstainReason": null,
+      "answer": "A Data Fiduciary must take reasonable security safeguards to prevent personal data breach, covering processing by its Data Processors too. At a minimum these include: data security measures such as encryption, obfuscation, masking or virtual tokens; controls on access to computer resources; logs, monitoring and review to detect unauthorised access, investigate and remediate it; measures for continued processing if data is compromised, such as backups; retaining such logs and personal data for one year unless another law requires otherwise; contract provisions with Data Processors requiring reasonable security safeguards; and appropriate technical and organisational measures to ensure the safeguards are effectively observed.",
+      "missingInfo": "",
+      "citedRefs": [
+        "dpdp-rules-2025 Rule 6",
+        "dpdp-rules-2025 Rule 6",
+        "dpdp-rules-2025 Rule 6",
+        "dpdp-rules-2025 Rule 6",
+        "dpdp-rules-2025 Rule 6",
+        "dpdp-rules-2025 Rule 6",
+        "dpdp-rules-2025 Rule 6",
+        "dpdp-rules-2025 Rule 6"
+      ],
+      "citesExpected": true,
+      "droppedCitations": 0,
+      "inputTokens": 3900,
+      "outputTokens": 829,
+      "latencyMs": 5675.2757,
+      "judgements": [
+        {
+          "metric": "Groundedness",
+          "score": 5,
+          "reason": "The response is comprehensive and accurately reflects all seven security safeguard requirements specified in Rule 6(1) of the context. It directly answers the query without introducing unrelated information, and it includes all relevant details necessary for a complete understanding of the minimum security safeguards required. The information is presented clearly and is entirely supported by the provided context.",
+          "failed": false
+        },
+        {
+          "metric": "Relevance",
+          "score": 5,
+          "reason": "The response fully and accurately addresses the query by providing a comprehensive list of security safeguards required for Data Fiduciaries. It includes all essential categories (encryption, access controls, monitoring, backups, contractual provisions, technical/organizational measures) with specific examples and clarifications. The response also adds relevant contextual insights, such as clarifying that safeguards must extend to Data Processors and specifying retention periods, which enhances understanding of the practical implementation requirements.",
+          "failed": false
+        }
+      ]
+    },
+    {
+      "id": "dpdp-04",
+      "answerable": true,
+      "question": "When is a purpose deemed no longer served, so that personal data must be erased?",
+      "abstained": false,
+      "abstainReason": null,
+      "answer": "Under Rule 8, for a Data Fiduciary of a class and purpose listed in the Third Schedule, the purpose is treated as no longer served when the Data Principal neither approaches it for the specified purpose nor exercises her rights for the time period specified in the Third Schedule. The data must then be erased, unless retention is needed to comply with a law. At least 48 hours before the period ends, the Data Fiduciary must tell the Data Principal that the data will be erased unless she logs in or otherwise makes contact. Separately, personal data and logs must be kept for at least one year from processing before erasure, unless another law or the Government requires longer retention.",
+      "missingInfo": "The actual classes of Data Fiduciaries, purposes and time periods in the Third Schedule are not in the passages.",
+      "citedRefs": [
+        "dpdp-rules-2025 Rule 8, part 1 of 2",
+        "dpdp-rules-2025 Rule 8, part 1 of 2",
+        "dpdp-rules-2025 Rule 8, part 2 of 2"
+      ],
+      "citesExpected": true,
+      "droppedCitations": 0,
+      "inputTokens": 3979,
+      "outputTokens": 570,
+      "latencyMs": 4341.5911,
+      "judgements": [
+        {
+          "metric": "Groundedness",
+          "score": 5,
+          "reason": "The response is fully grounded in the provided context and accurately addresses the query. It correctly identifies that under Rule 8(1), a purpose is deemed no longer served when the Data Principal neither approaches the Data Fiduciary for the specified purpose nor exercises her rights during the time period in the Third Schedule. The response accurately includes the procedural safeguard (48-hour notice requirement) and the separate one-year retention requirement for logs. All information is directly sourced from the context, presented accurately, and comprehensively addresses the question without introducing unrelated or incorrect information.",
+          "failed": false
+        },
+        {
+          "metric": "Relevance",
+          "score": 4,
+          "reason": "The response directly and accurately addresses the query by identifying the specific criteria for when a purpose is deemed no longer served (inactivity for a specified period) and when erasure must occur. It includes essential procedural details (48-hour notice requirement), exceptions (retention for legal compliance), and additional retention requirements. The response is comprehensive and includes relevant contextual information about the regulatory framework, making it more than just a basic answer to the question.",
+          "failed": false
+        }
+      ]
+    },
+    {
+      "id": "dpdp-05",
+      "answerable": true,
+      "question": "How must a Data Fiduciary get consent before processing a child\u0027s personal data?",
+      "abstained": false,
+      "abstainReason": null,
+      "answer": "Before processing any personal data of a child, a Data Fiduciary must adopt appropriate technical and organisational measures to ensure verifiable consent of the parent is obtained. It must also exercise due diligence to check that the person claiming to be the parent is an identifiable adult. This check uses either reliable identity and age details the Data Fiduciary already holds, or identity and age details voluntarily provided by the individual or through a virtual token issued by an authorised entity. An adult is someone who has completed eighteen years. Where the parent is not a registered user, the check is made against details issued by an entity entrusted by law or the Government, or a virtual token mapped to them, and the parent may provide these via a Digital Locker service provider.",
+      "missingInfo": "The passages do not cover the exceptions in the Fourth Schedule in detail, so exemptions from parental consent are not addressed here.",
+      "citedRefs": [
+        "dpdp-rules-2025 Rule 10, part 1 of 3",
+        "dpdp-rules-2025 Rule 10, part 1 of 3",
+        "dpdp-rules-2025 Rule 10, part 1 of 3",
+        "dpdp-rules-2025 Rule 10, part 3 of 3"
+      ],
+      "citesExpected": true,
+      "droppedCitations": 0,
+      "inputTokens": 3775,
+      "outputTokens": 512,
+      "latencyMs": 4774.5902,
+      "judgements": [
+        {
+          "metric": "Groundedness",
+          "score": 5,
+          "reason": "The response thoroughly and accurately addresses the query by comprehensively covering all key requirements from Rule 10 of the Digital Personal Data Protection Rules, 2025. It correctly identifies the need for appropriate measures, verifiable parental consent, due diligence verification that the parent is an adult, the two verification methods (reliable details held or voluntarily provided), the definition of an adult, authorized entities, and the Digital Locker service provider option. All information is directly supported by the context with no inaccuracies or omissions of significant details needed for a complete understanding.",
+          "failed": false
+        },
+        {
+          "metric": "Relevance",
+          "score": 4,
+          "reason": "The response thoroughly and accurately addresses the query by detailing the specific procedures and requirements for obtaining verifiable consent from parents before processing a child\u0027s personal data. It includes technical and organisational measures, identity verification methods, and multiple acceptable documentation approaches. The response is comprehensive, accurate, and provides sufficient detail for practical understanding without extraneous information.",
+          "failed": false
+        }
+      ]
+    },
+    {
+      "id": "rbc-01",
+      "answerable": true,
+      "question": "What must a Key Fact Statement contain?",
+      "abstained": false,
+      "abstainReason": null,
+      "answer": "The passages do not say what a Key Fact Statement must contain. They only say that an NBFC must provide a KFS as per the Responsible Business Conduct Directions, 2025. They also say that, where a KFS is required, it must mention whether pre-payment charges apply.",
+      "missingInfo": "The full list of KFS contents is not given. Paragraph 29 of the Responsible Business Conduct Directions, 2025, which sets out the KFS requirements, is not among the passages.",
+      "citedRefs": [
+        "rbi-nbfc-credit-facilities-2025 Para 9, part 1 of 2",
+        "rbi-nbfc-responsible-business-conduct-2025 Para 34, part 2 of 2"
+      ],
+      "citesExpected": false,
+      "droppedCitations": 0,
+      "inputTokens": 3111,
+      "outputTokens": 344,
+      "latencyMs": 3758.0836,
+      "judgements": [
+        {
+          "metric": "Groundedness",
+          "score": 5,
+          "reason": "The response deserves a high groundedness score because it accurately and honestly addresses the query by: (1) correctly identifying that the provided context does not contain detailed specifications of KFS contents, (2) accurately citing what the context does say about KFS (that it must be provided per certain Directions), and (3) accurately extracting the one specific requirement mentioned in the context (that pre-payment charges information must be included in the KFS where applicable). The assistant does not introduce extraneous information or make unsupported claims about KFS contents. The response is complete given the limitations of the provided context.",
+          "failed": false
+        },
+        {
+          "metric": "Relevance",
+          "score": 3,
+          "reason": "The response attempts to address the query about KFS requirements but honestly acknowledges that the provided passages do not comprehensively answer the question. It provides one specific mandatory element (mentioning pre-payment charges) that the passages do mention, but this represents only partial information. The response is accurate in what it states but incomplete in addressing the full scope of what a KFS must contain, since the source material itself lacks this comprehensive information. This falls into the Incomplete Response category.",
+          "failed": false
+        }
+      ]
+    },
+    {
+      "id": "rbc-02",
+      "answerable": true,
+      "question": "Can an NBFC add penal interest to my loan\u0027s interest rate when I miss a payment?",
+      "abstained": false,
+      "abstainReason": null,
+      "answer": "No. For loans covered by these rules, an NBFC cannot add penal interest to the interest rate when a borrower defaults or misses a payment. Any penalty must be charged as \u0027penal charges\u0027, which must be reasonable, applied only on the amount in default, and not capitalised. The NBFC may still charge interest on unpaid interest, including unpaid EMI, at the contracted rate until the default is remedied, but not at a penal rate. These rules apply to fresh loans from April 1, 2024, and to existing loans from June 30, 2024, and they exclude credit cards, external commercial borrowings, trade credits, structured obligations and other foreign currency loans.",
+      "missingInfo": "",
+      "citedRefs": [
+        "rbi-nbfc-responsible-business-conduct-2025 Para 30, part 1 of 3",
+        "rbi-nbfc-responsible-business-conduct-2025 Para 30, part 2 of 3",
+        "rbi-nbfc-responsible-business-conduct-2025 Para 30, part 1 of 3",
+        "rbi-nbfc-responsible-business-conduct-2025 Para 30, part 1 of 3",
+        "rbi-nbfc-responsible-business-conduct-2025 Para 30, part 1 of 3"
+      ],
+      "citesExpected": true,
+      "droppedCitations": 0,
+      "inputTokens": 3913,
+      "outputTokens": 597,
+      "latencyMs": 4890.7313,
+      "judgements": [
+        {
+          "metric": "Groundedness",
+          "score": 5,
+          "reason": "The response is fully grounded in the provided context. It directly answers the query by clearly stating that penal interest cannot be added, then provides accurate supporting details including the requirement to use penal charges instead, the conditions under which these charges apply (reasonableness, non-discrimination, non-capitalization), the treatment of interest on unpaid EMI, and the proper scope of applicability (dates and product exclusions). All information is explicitly supported by Para 30 and other relevant sections of the context, with no inaccuracies or unsupported claims.",
+          "failed": false
+        },
+        {
+          "metric": "Relevance",
+          "score": 5,
+          "reason": "The response fully and accurately addresses the query with a clear \u0022No\u0022 followed by comprehensive explanation of NBFC penalty rules. It goes beyond basic completeness by providing regulatory context, distinguishing between penal interest (prohibited) and penal charges (allowed with conditions), explaining the scope of applicability, and clarifying what penalties are permitted. This additional regulatory insight and framework information enhances the borrower\u0027s understanding of their rights and protections.",
+          "failed": false
+        }
+      ]
+    },
+    {
+      "id": "rbc-03",
+      "answerable": true,
+      "question": "Can a recovery agent call me late at night about an overdue loan?",
+      "abstained": false,
+      "abstainReason": null,
+      "answer": "Generally no. Under one provision, NBFCs and their agents must not call borrowers before 8:00 a.m. or after 7:00 p.m. for recovery of overdue loans, and persistent calling is also barred. That provision does not apply to microfinance loans. Another provision treats calling before 9:00 a.m. or after 6:00 p.m. as a harsh method. The two provisions give different time windows, and the passages do not say how they relate or which one applies to your loan.",
+      "missingInfo": "The passages do not reconcile the two calling-hour windows (8 a.m.-7 p.m. vs 9 a.m.-6 p.m.), and do not say what limits, if any, apply to microfinance loans beyond the exclusion in one provision.",
+      "citedRefs": [
+        "rbi-nbfc-responsible-business-conduct-2025 Para 100",
+        "rbi-nbfc-responsible-business-conduct-2025 Para 100",
+        "rbi-nbfc-responsible-business-conduct-2025 Para 91"
+      ],
+      "citesExpected": true,
+      "droppedCitations": 0,
+      "inputTokens": 2653,
+      "outputTokens": 425,
+      "latencyMs": 6250.9846,
+      "judgements": [
+        {
+          "metric": "Groundedness",
+          "score": 4,
+          "reason": "The response correctly identifies and accurately cites both relevant provisions from the context (Para 100 and Para 91) with their specific time windows and notes the microfinance exception. However, the response is incomplete because it acknowledges the ambiguity between provisions without providing a sufficiently grounded answer: calling \u0022late at night\u0022 is clearly prohibited under Para 100 (after 7:00 p.m.), making the answer \u0022no\u0022 definitive on that basis alone. The response captures correct information but lacks the specificity needed to fully address the query based on what the context clearly establishes.",
+          "failed": false
+        },
+        {
+          "metric": "Relevance",
+          "score": 4,
+          "reason": "The response directly and accurately addresses the query about calling times for recovery agents. It provides specific time windows from two different provisions, identifies which entities they apply to (NBFCs vs. microfinance), and mentions related restrictions like persistent calling. While the response doesn\u0027t provide a simple definitive answer due to conflicting provisions, it comprehensively explains the regulatory landscape and appropriately acknowledges this ambiguity. This represents a complete and nuanced response rather than an incomplete one.",
+          "failed": false
+        }
+      ]
+    },
+    {
+      "id": "rbc-04",
+      "answerable": true,
+      "question": "What compensation is due if an NBFC delays returning my property documents after I repay the loan?",
+      "abstained": false,
+      "abstainReason": null,
+      "answer": "If the delay is attributable to the NBFC, it must compensate you at \u20B95,000 for each day of delay. The NBFC must release the documents and remove registered charges within 30 days of full repayment or settlement, and must tell you the reasons if it is late. If documents are lost or damaged, the NBFC must help you get duplicate or certified copies at its own cost, and it gets an extra 30 days (60 days in total) before the daily compensation starts counting.",
+      "missingInfo": "",
+      "citedRefs": [
+        "rbi-nbfc-responsible-business-conduct-2025 Para 39",
+        "rbi-nbfc-responsible-business-conduct-2025 Para 35",
+        "rbi-nbfc-responsible-business-conduct-2025 Para 39",
+        "rbi-nbfc-responsible-business-conduct-2025 Para 40",
+        "rbi-nbfc-responsible-business-conduct-2025 Para 40"
+      ],
+      "citesExpected": true,
+      "droppedCitations": 0,
+      "inputTokens": 2214,
+      "outputTokens": 498,
+      "latencyMs": 3700.7629,
+      "judgements": [
+        {
+          "metric": "Groundedness",
+          "score": 5,
+          "reason": "The response is fully grounded in the provided context. It accurately answers the query by citing the specific compensation amount (\u20B95,000 per day) from Para 39, correctly explains the 30-day timeline from Para 35, accurately describes the scenario for lost/damaged documents with the extended 60-day period from Para 40, and properly qualifies that compensation applies only when delay is attributable to the NBFC. All statements are directly supported by the context with no incorrect information, and the response comprehensively addresses the question without introducing extraneous details.",
+          "failed": false
+        },
+        {
+          "metric": "Relevance",
+          "score": 5,
+          "reason": "The response fully and accurately addresses the query by providing the specific compensation amount (\u20B95,000 per day), conditions for its application, relevant timelines (30-60 days), and additional contextual information about related NBFC obligations and special circumstances for lost/damaged documents. The answer goes beyond a bare minimum response by explaining conditions, grace periods, and practical details that enhance understanding of the user\u0027s rights.",
+          "failed": false
+        }
+      ]
+    },
+    {
+      "id": "out-01",
+      "answerable": false,
+      "question": "What is the GST rate on gold jewellery?",
+      "abstained": true,
+      "abstainReason": "model-abstained",
+      "answer": "",
+      "missingInfo": "The GST rate applicable to gold jewellery, which would come from GST law or notifications and not from these RBI NBFC directions.",
+      "citedRefs": [],
+      "citesExpected": false,
+      "droppedCitations": 0,
+      "inputTokens": 3753,
+      "outputTokens": 137,
+      "latencyMs": 4714.8138,
+      "judgements": []
+    },
+    {
+      "id": "out-02",
+      "answerable": false,
+      "question": "How do I file my income tax return?",
+      "abstained": true,
+      "abstainReason": "model-abstained",
+      "answer": "",
+      "missingInfo": "Step-by-step instructions for an individual or taxpayer to file an income tax return (for example, forms, portal, deadlines). The passages are NBFC regulatory directions and do not address this.",
+      "citedRefs": [],
+      "citesExpected": false,
+      "droppedCitations": 0,
+      "inputTokens": 3661,
+      "outputTokens": 202,
+      "latencyMs": 2785.985,
+      "judgements": []
+    },
+    {
+      "id": "out-03",
+      "answerable": false,
+      "question": "Who won the cricket world cup?",
+      "abstained": true,
+      "abstainReason": "low-similarity",
+      "answer": "",
+      "missingInfo": "No passage in the corpus is close enough to the question.",
+      "citedRefs": [],
+      "citesExpected": false,
+      "droppedCitations": 0,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "latencyMs": 65.8401,
+      "judgements": []
+    },
+    {
+      "id": "out-04",
+      "answerable": false,
+      "question": "What is the current repo rate?",
+      "abstained": true,
+      "abstainReason": "model-abstained",
+      "answer": "",
+      "missingInfo": "The current repo rate (the RBI policy rate) is not given in any passage. They cover NBFC interest rate disclosure, interest rate models and benchmark-linked loans, but give no repo rate figure.",
+      "citedRefs": [],
+      "citesExpected": false,
+      "droppedCitations": 0,
+      "inputTokens": 2619,
+      "outputTokens": 118,
+      "latencyMs": 4566.0403,
+      "judgements": []
+    },
+    {
+      "id": "out-05",
+      "answerable": false,
+      "question": "What are SEBI\u0027s rules for mutual fund distributors?",
+      "abstained": true,
+      "abstainReason": "model-abstained",
+      "answer": "",
+      "missingInfo": "SEBI regulations, circulars or codes of conduct that govern mutual fund distributors, such as registration, qualifications, commissions, or conduct requirements.",
+      "citedRefs": [],
+      "citesExpected": false,
+      "droppedCitations": 0,
+      "inputTokens": 4730,
+      "outputTokens": 203,
+      "latencyMs": 6193.3219,
+      "judgements": []
+    },
+    {
+      "id": "out-06",
+      "answerable": false,
+      "question": "Up to what amount are bank deposits insured by DICGC?",
+      "abstained": true,
+      "abstainReason": "model-abstained",
+      "answer": "",
+      "missingInfo": "The passages contain no information about DICGC or deposit insurance limits. They cover default loss guarantee (DLG) forms and caps, capital treatment, partial credit enhancement, collateral lending and loan disbursal.",
+      "citedRefs": [],
+      "citesExpected": false,
+      "droppedCitations": 0,
+      "inputTokens": 3203,
+      "outputTokens": 122,
+      "latencyMs": 2960.171,
+      "judgements": []
+    },
+    {
+      "id": "out-07",
+      "answerable": false,
+      "question": "Within how many days must an insurer settle a health insurance claim?",
+      "abstained": true,
+      "abstainReason": "model-abstained",
+      "answer": "",
+      "missingInfo": "The passages contain no insurer claim-settlement timeline for health insurance; they cover NBFC rules, KYC/UAPA procedures and data protection rules. Insurance regulations (e.g., IRDAI rules) would be needed.",
+      "citedRefs": [],
+      "citesExpected": false,
+      "droppedCitations": 0,
+      "inputTokens": 2429,
+      "outputTokens": 132,
+      "latencyMs": 2239.7398,
+      "judgements": []
+    },
+    {
+      "id": "out-08",
+      "answerable": false,
+      "question": "How much home loan interest can I deduct from my taxable income?",
+      "abstained": true,
+      "abstainReason": "model-abstained",
+      "answer": "",
+      "missingInfo": "Income tax rules on deducting home loan interest, including deduction limits and eligibility conditions. These are tax law matters and are not in the RBI NBFC credit facilities passages provided.",
+      "citedRefs": [],
+      "citesExpected": false,
+      "droppedCitations": 0,
+      "inputTokens": 2809,
+      "outputTokens": 152,
+      "latencyMs": 2839.1149,
+      "judgements": []
+    },
+    {
+      "id": "out-09",
+      "answerable": false,
+      "question": "Does a crypto exchange need to register with the Financial Intelligence Unit in India?",
+      "abstained": true,
+      "abstainReason": "model-abstained",
+      "answer": "",
+      "missingInfo": "Passages on whether crypto or virtual digital asset exchanges are reporting entities under the PMLA, and on any FIU-IND registration requirement for them. The passages cover only NBFC KYC obligations.",
+      "citedRefs": [],
+      "citesExpected": false,
+      "droppedCitations": 0,
+      "inputTokens": 4032,
+      "outputTokens": 278,
+      "latencyMs": 3340.5945,
+      "judgements": []
+    },
+    {
+      "id": "out-10",
+      "answerable": false,
+      "question": "What compensation does a builder owe for delayed possession of a flat under RERA?",
+      "abstained": true,
+      "abstainReason": "model-abstained",
+      "answer": "",
+      "missingInfo": "The RERA provisions on a builder\u0027s or promoter\u0027s liability (such as interest or compensation for delayed possession of a flat) are not in the passages. They only cover RBI directions for NBFCs.",
+      "citedRefs": [],
+      "citesExpected": false,
+      "droppedCitations": 0,
+      "inputTokens": 3068,
+      "outputTokens": 153,
+      "latencyMs": 2559.6738,
+      "judgements": []
+    }
+  ]
+}

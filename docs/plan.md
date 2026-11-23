@@ -64,6 +64,7 @@ product features for compliance.
 | D46 | Answer evals at effort medium only (spec 0004) | Owner | 2026-11-23 |
 | D47 | Judge: Groundedness + Relevance (Microsoft.Extensions.AI.Evaluation.Quality) with `claude-haiku-4-5`; owner hand-checks 10 judgements (spec 0004) | Owner | 2026-11-23 |
 | D48 | Similarity floor = highest with no answerable question refused, minus 0.02 (spec 0004) | Owner | 2026-11-23 |
+| D49 | BM25 is the default keyword scoring, chosen from the golden-set results (recall@5 0.85 vs 0.80, MRR@10 0.772 vs 0.637, n = 20); the floor is 0.60 (spec 0004) | Owner | 2026-11-24 |
 
 ## 3. Open questions
 

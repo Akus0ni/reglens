@@ -21,6 +21,7 @@ public sealed class CorpusFilesTests : IDisposable
         {
             ("rbi-nbfc-kyc-2025", DocumentStructure.RbiDirections),
             ("rbi-nbfc-credit-facilities-2025", DocumentStructure.RbiDirections),
+            ("rbi-nbfc-responsible-business-conduct-2025", DocumentStructure.RbiDirections),
             ("dpdp-rules-2025", DocumentStructure.GazetteRules),
             ("dpdp-rules-2025-corrigendum", DocumentStructure.Corrigendum),
         });

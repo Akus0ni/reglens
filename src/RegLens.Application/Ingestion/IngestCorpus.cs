@@ -32,6 +32,12 @@ public sealed partial class IngestCorpus(
             results.Add(result);
         }
 
+        // BM25 reads corpus-wide statistics; they change only when a document was written (R4.4).
+        if (results.Any(result => result.Status != IngestStatus.Skipped))
+        {
+            await store.RefreshSearchStatisticsAsync(cancellationToken).ConfigureAwait(false);
+        }
+
         var report = new IngestReport(results, Stopwatch.GetElapsedTime(started));
         LogTotal(report.Documents.Count, report.TotalChunksWritten, report.Elapsed.TotalSeconds);
         return report;
