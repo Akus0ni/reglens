@@ -27,14 +27,14 @@ public sealed class PostgresChunkSearch(NpgsqlDataSource dataSource) : IChunkSea
 
     private const string DenseCandidates = """
         dense AS (
-            SELECT id, row_number() OVER (ORDER BY distance, id) AS r
+            SELECT id, row_number() OVER (ORDER BY distance, id) AS r, 1 - distance AS similarity
             FROM (SELECT id, embedding <=> @vector AS distance FROM chunks
                   ORDER BY embedding <=> @vector LIMIT @candidates) d
         )
         """;
 
     private const string NoDenseCandidates = """
-        dense AS (SELECT NULL::bigint AS id, NULL::bigint AS r WHERE false)
+        dense AS (SELECT NULL::bigint AS id, NULL::bigint AS r, NULL::float8 AS similarity WHERE false)
         """;
 
     private const string KeywordCandidates = """
@@ -48,7 +48,7 @@ public sealed class PostgresChunkSearch(NpgsqlDataSource dataSource) : IChunkSea
 
     private const string Fused = """
         fused AS (
-            SELECT id, dense.r AS d_rank, lex.r AS k_rank,
+            SELECT id, dense.r AS d_rank, lex.r AS k_rank, dense.similarity,
                    coalesce(1.0 / (@rrf_k + dense.r), 0) + coalesce(1.0 / (@rrf_k + lex.r), 0) AS score
             FROM dense FULL OUTER JOIN lex USING (id)
         )
@@ -56,7 +56,7 @@ public sealed class PostgresChunkSearch(NpgsqlDataSource dataSource) : IChunkSea
 
     private const string HitColumns = """
         c.id, c.document_id, d.title, c.para_ref, c.heading, c.page_start, c.page_end,
-        left(c.content, @excerpt), f.d_rank, f.k_rank, coalesce(f.score, 0)::float8
+        left(c.content, @excerpt), f.d_rank, f.k_rank, coalesce(f.score, 0)::float8, f.similarity
         """;
 
     public async Task<IReadOnlyList<SearchHit>> HybridAsync(SearchQuery query, CancellationToken cancellationToken)
@@ -138,7 +138,8 @@ public sealed class PostgresChunkSearch(NpgsqlDataSource dataSource) : IChunkSea
                 Excerpt: reader.GetString(7),
                 DenseRank: reader.IsDBNull(8) ? null : (int)reader.GetInt64(8),
                 KeywordRank: reader.IsDBNull(9) ? null : (int)reader.GetInt64(9),
-                FusedScore: reader.GetDouble(10)));
+                FusedScore: reader.GetDouble(10),
+                Similarity: reader.IsDBNull(11) ? null : reader.GetDouble(11)));
         }
 
         return hits;

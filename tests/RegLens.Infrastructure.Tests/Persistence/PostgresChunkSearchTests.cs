@@ -42,6 +42,21 @@ public class PostgresChunkSearchTests(PostgresFixture postgres)
     }
 
     [Fact]
+    public async Task ReportsCosineSimilarityForDenseHitsOnly()
+    {
+        var search = await SeededSearch();
+
+        var hits = await search.HybridAsync(Query("phone contact list", Near(2, 0, 1)), Ct);
+
+        // Near(2, 0, 1) = (0.9, 0.4, 0.2) / |v|; similarity to axis i is that component (spec 0003, R3.1).
+        var norm = Math.Sqrt((0.9 * 0.9) + (0.4 * 0.4) + (0.2 * 0.2));
+        hits.Single(h => h.ParaRef == "Para 13").Similarity.Should().BeApproximately(0.9 / norm, 1e-6);
+        hits.Single(h => h.ParaRef == "Para 6").Similarity.Should().BeApproximately(0.4 / norm, 1e-6);
+        hits.Where(h => h.DenseRank is null).Should().AllSatisfy(h => h.Similarity.Should().BeNull());
+        (await search.HybridAsync(KeywordOnly("phone"), Ct)).Should().AllSatisfy(h => h.Similarity.Should().BeNull());
+    }
+
+    [Fact]
     public async Task MatchesAnyQuestionWordOnTheKeywordSide()
     {
         var search = await SeededSearch();

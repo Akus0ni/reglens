@@ -2,6 +2,23 @@
 
 Newest first. What was done, why, and the problems hit.
 
+## 2026-11-23 — Spec 0003: answers with verified citations built
+
+- `POST /ask`: search → similarity floor → Sonnet 5.5 with passages as escaped data and a JSON schema → our
+  verifier drops any citation whose chunk was not sent or whose quote is not in it → answer or abstention.
+  HybridCache with Redis (added to compose); refusals and degraded answers are not cached. `/search` hits gained
+  `similarity`.
+- **Results** (spec 0003 §10, n = 9, `claude-sonnet-5-5`, effort medium): 4 of 5 planned answerable questions
+  answered with verified citations, 0 citations dropped; the fifth (KFS contents) abstained correctly because the
+  KFS rules live in the RBI Responsible Business Conduct Directions, which are not in the corpus (new Q7).
+  Out-of-scope questions abstained (2 by Claude, 1 by the floor with no call). **$0.0128 per Claude call**,
+  p50 3.3 s; cache hit 29–44 ms; 10 concurrent identical questions → 1 call.
+- Problems hit: an answer mentioned "Passage 184" → prompt v2. With Redis down, StackExchange.Redis's 5 s default
+  timeouts added 5–9 s per request → 500 ms timeouts, ~0.9 s. `/ask` with Ollama down takes 30 s (Ollama retries
+  before the keyword fallback): follow-up. `GetResponseAsync<T>` is in `Microsoft.Extensions.AI`, not the
+  abstractions, so the schema is sent and parsed by our code.
+- Tests: 163 (55 new).
+
 ## 2026-11-23 — Spec 0003 drafted: answers with verified citations
 
 - PR #8 merged; the owner accepted spec 0002's A5 gap and moved IDF weighting to spec 0004 (D40).

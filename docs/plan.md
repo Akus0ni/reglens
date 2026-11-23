@@ -66,6 +66,7 @@ product features for compliance.
 | Q4 | Name and visibility of the Day 2 agent repo | Day 2 |
 | Q5 | Langfuse Cloud (Hobby) or self-hosted for agent traces | Day 2 tracing |
 | Q6 | Set `OLLAMA_KEEP_ALIVE` (e.g. `24h`) on the owner's machine so the embedding model stays loaded between searches? | Nothing (cold searches wait ~30 s) |
+| Q7 | Add the RBI (NBFCs – Responsible Business Conduct) Directions, 2025 to the corpus? Credit Facilities Para 9 points there for the Key Fact Statement's contents, so KFS questions abstain today (spec 0003 §9) | Golden-set questions on KFS and loan disclosures |
 
 ## 4. Specs (proposed order)
 

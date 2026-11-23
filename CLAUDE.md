@@ -5,9 +5,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project status
 
 RegLens is a .NET 10 API that answers questions about Indian NBFC regulation with verified citations and exposes
-itself as an MCP server. **Built so far: spec 0001 ingestion and spec 0002 hybrid retrieval** (`GET /search`). Next:
-spec 0003, answers with verified citations. Plan, decisions (D*n*) and open questions (Q*n*): `docs/plan.md`. Specs: `docs/specs/`.
-History: `docs/project-log.md`.
+itself as an MCP server. **Built so far: spec 0001 ingestion, spec 0002 hybrid retrieval** (`GET /search`) **and
+spec 0003 answers** (`POST /ask`). Next: spec 0004, golden set and evals. Plan, decisions (D*n*) and open questions
+(Q*n*): `docs/plan.md`. Specs: `docs/specs/`. History: `docs/project-log.md`.
 
 ## Workflow — read first
 
@@ -24,7 +24,7 @@ History: `docs/project-log.md`.
 ## Commands
 
 ```powershell
-docker compose up -d                              # Postgres+pgvector (127.0.0.1:5432) and Aspire dashboard (http://localhost:18888)
+docker compose up -d                              # Postgres+pgvector (127.0.0.1:5432), Redis (127.0.0.1:6379), Aspire dashboard (http://localhost:18888)
 ollama pull nomic-embed-text                      # Ollama runs natively on http://localhost:11434
 dotnet user-secrets set "ConnectionStrings:RegLens" "Host=localhost;Port=5432;Database=reglens;Username=reglens;Password=reglens-dev" --project src/RegLens.Ingest
 
@@ -41,6 +41,7 @@ dotnet run --project src/RegLens.Ingest -- --force --document dpdp-rules-2025
 dotnet user-secrets set "ConnectionStrings:RegLens" "<same as above>" --project src/RegLens.Api
 dotnet run --project src/RegLens.Api              # http://127.0.0.1:5180 (5080 is the owner's AgencyOS)
 curl "http://127.0.0.1:5180/search?q=Rule%207&topK=5"
+curl -X POST http://127.0.0.1:5180/ask -H "Content-Type: application/json" -d '{"question":"When must a breach be reported to the Board?"}'
 
 ./scripts/protect-main.ps1                        # (re)apply the main ruleset; needs gh logged in as the owner
 scripts/delete-merged-branch.sh <branch> <pr>     # after the owner merges a PR
@@ -54,14 +55,17 @@ The dev password `reglens-dev` is the compose default for a localhost-only conta
 
 - Windows 11, PowerShell 5.1 and Git Bash. .NET SDKs 8, 9 and 10 installed; target .NET 10.
 - Ollama is installed on D:, with models in `D:\OllamaModels` (`OLLAMA_MODELS` user variable).
-- `ANTHROPIC_API_KEY` comes from the environment or user-secrets, never from `appsettings*.json`.
+- `ANTHROPIC_API_KEY` is a Windows user environment variable, read by the Anthropic SDK; never put it in
+  `appsettings*.json` or user-secrets. A terminal opened before the variable was set does not see it; start the API
+  from a new terminal, or load it with `[Environment]::GetEnvironmentVariable('ANTHROPIC_API_KEY','User')`.
 
 ## Architecture
 
 Clean architecture (D22), dependencies pointing inward and enforced by `tests/RegLens.Architecture.Tests`:
 `RegLens.Domain` (pure: corpus types, cleaning, chunking) ← `RegLens.Application` (use cases + the ports they own,
-`Microsoft.Extensions.AI` abstractions) ← `RegLens.Infrastructure` (Npgsql/pgvector, SQL migrations, PdfPig,
-OllamaSharp, manifest) ← hosts `RegLens.Ingest` (console) and, later, `RegLens.Api`. Hosts are composition roots only.
+`Microsoft.Extensions.AI` and HybridCache abstractions) ← `RegLens.Infrastructure` (Npgsql/pgvector, SQL migrations,
+PdfPig, OllamaSharp, Anthropic SDK, HybridCache + Redis, manifest) ← hosts `RegLens.Ingest` (console) and `RegLens.Api`
+(web; `AddRegLensAnswers` wires the answer path for the API only). Hosts are composition roots only.
 
 - **Ingest** (built, spec 0001): `ManifestCatalog` verifies every file's size and SHA-256 before any write →
   PdfPig `ContentOrderTextExtractor` (only `ingest_pages`) → `TextCleaner` drops TOC lines, page numbers, non-Latin
@@ -76,10 +80,14 @@ OllamaSharp, manifest) ← hosts `RegLens.Ingest` (console) and, later, `RegLens
   full-text top-40 (OR of the question's lexemes; `tsv` covers context, heading, para_ref and content) fused with
   RRF k = 60 → citations in the question ("Rule 7", "para 6") are looked up exactly and pinned first. Every hit
   carries dense rank, keyword rank and fused score. The keyword side has no IDF yet (spec 0002 §10).
-- **Ask** (planned, `POST /ask`): HybridCache lookup → Ollama embeds the question → one SQL query fuses dense (pgvector HNSW)
-  and keyword (`tsvector`) top-40 lists with RRF → abstain early if the best score is low → Sonnet answers from the
-  chunks as delimited data with structured citations → a code verifier checks every citation → answer or
-  "not found". `GET /search` and the MCP `search_regulations` tool stop after retrieval and never call Anthropic.
+- **Ask** (built, spec 0003, `POST /ask`): `AnswerQuestion` looks up HybridCache (L1 memory, L2 Redis; key =
+  prompt version + model + effort + index version + topK + sha256 of the normalised question) → `SearchRegulations`
+  → abstain without a Claude call if the best `similarity` < 0.55 and nothing is pinned → full passages to
+  `claude-sonnet-5-5` as escaped `<passage>` data with a JSON schema (`AnswerPrompt`) → `CitationVerifier` (Domain)
+  drops citations whose chunk was not sent or whose quote is not in it (normalised substring, ≥ 20 chars) → answer,
+  or abstention (`low-similarity`, `model-abstained`, `unverified`, `model-refused`). Refusals and degraded answers
+  are not cached. `AnthropicFailureTranslation` maps SDK outages to 503; truncated or unparsable output is 502.
+  `GET /search` and the MCP `search_regulations` tool stop after retrieval and never call Anthropic.
 - **MCP** (planned, `/mcp`): read-only tools over the same services, consumed by the Day 2 Python agent (separate repo).
 - **Evals** (planned): golden set + retrieval metrics (no LLM) + Haiku-judged groundedness/relevance; numbers go to
   `evals/results.md` with n, date and model IDs.

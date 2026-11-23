@@ -1,11 +1,14 @@
+using Anthropic;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Npgsql;
 using OllamaSharp;
+using RegLens.Application.Answers;
 using RegLens.Application.Ingestion;
 using RegLens.Application.Search;
+using RegLens.Infrastructure.Answers;
 using RegLens.Infrastructure.Corpus;
 using RegLens.Infrastructure.Embeddings;
 using RegLens.Infrastructure.Persistence;
@@ -15,6 +18,7 @@ namespace RegLens.Infrastructure;
 public static class InfrastructureServiceCollectionExtensions
 {
     public const string ConnectionStringName = "RegLens";
+    public const string RedisConnectionStringName = "Redis";
 
     private const string OllamaHttpClientName = "ollama";
 
@@ -53,6 +57,46 @@ public static class InfrastructureServiceCollectionExtensions
             provider.GetRequiredService<IHttpClientFactory>().CreateClient(OllamaHttpClientName),
             provider.GetRequiredService<IOptions<OllamaOptions>>().Value.EmbeddingModel));
 
+        return services;
+    }
+
+    /// <summary>
+    /// The answer path, for the API only (spec 0003, R3.11–R3.13): Claude behind <see cref="IChatClient"/>,
+    /// HybridCache with Redis as its second level, full passages and the index version.
+    /// </summary>
+    public static IServiceCollection AddRegLensAnswers(this IServiceCollection services, IConfiguration configuration)
+    {
+        ArgumentNullException.ThrowIfNull(configuration);
+
+        services.AddOptions<AnswerOptions>().BindConfiguration(AnswerOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
+        services.AddSingleton<IPassageReader, PostgresPassageReader>();
+        services.AddSingleton<IIndexVersion, PostgresIndexVersion>();
+
+        // The key comes from ANTHROPIC_API_KEY (P13). One retry layer: the SDK's own (P10).
+        services.AddSingleton(provider =>
+        {
+            var answers = provider.GetRequiredService<IOptions<AnswerOptions>>().Value;
+            return new AnthropicClient
+            {
+                Timeout = TimeSpan.FromSeconds(answers.RequestTimeoutSeconds),
+                MaxRetries = answers.MaxRetries,
+            };
+        });
+        services.AddSingleton<IChatClient>(provider =>
+        {
+            var answers = provider.GetRequiredService<IOptions<AnswerOptions>>().Value;
+            return new AnthropicFailureTranslation(
+                provider.GetRequiredService<AnthropicClient>().AsIChatClient(answers.Model, answers.MaxOutputTokens));
+        });
+
+        // HybridCache uses a registered IDistributedCache as its second level (HybridCache docs).
+        var redis = configuration.GetConnectionString(RedisConnectionStringName);
+        if (!string.IsNullOrWhiteSpace(redis))
+        {
+            services.AddStackExchangeRedisCache(options => options.Configuration = redis);
+        }
+
+        services.AddHybridCache();
         return services;
     }
 

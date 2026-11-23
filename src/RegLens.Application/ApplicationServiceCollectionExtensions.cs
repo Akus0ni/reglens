@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using RegLens.Application.Answers;
 using RegLens.Application.Ingestion;
 using RegLens.Application.Search;
 using RegLens.Domain.Chunking;
@@ -17,6 +18,7 @@ public static class ApplicationServiceCollectionExtensions
         services.AddSingleton<ChunkEmbedder>();
         services.AddTransient<IngestCorpus>();
         services.AddTransient<SearchRegulations>();
+        services.AddTransient<AnswerQuestion>();
         return services;
     }
 }

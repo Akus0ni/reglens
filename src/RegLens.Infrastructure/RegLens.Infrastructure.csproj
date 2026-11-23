@@ -1,12 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- Adapters for the Application ports (D22): Postgres + pgvector, PdfPig, Ollama. Never references a host. -->
+  <!-- Adapters for the Application ports (D22): Postgres + pgvector, PdfPig, Ollama, Anthropic, HybridCache + Redis. Never references a host. -->
 
   <ItemGroup>
     <PackageReference Include="Npgsql" />
     <PackageReference Include="Pgvector" />
     <PackageReference Include="PdfPig" />
     <PackageReference Include="OllamaSharp" />
+    <PackageReference Include="Anthropic" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Hybrid" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" />
     <PackageReference Include="Microsoft.Extensions.Http" />
     <PackageReference Include="Microsoft.Extensions.Http.Resilience" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
