@@ -18,7 +18,7 @@ product features for compliance.
 |---|----------|--------|------|
 | D1 | Two projects: RegLens (.NET, this repo) on Day 1; a Python compliance-review agent on Day 2 that calls RegLens over MCP | Owner | 2026-11-23 |
 | D2 | LLMs via the Anthropic Claude API only; everything else free or local | Owner | 2026-11-23 |
-| D3 | `claude-sonnet-5-5` for answers and agent steps; `claude-haiku-4-5` for bulk work (chunk context) and as the eval judge | Owner | 2026-11-23 |
+| D3 | `claude-sonnet-5-5` for answers and agent steps; `claude-haiku-4-5` for bulk work (chunk context) and as the eval judge (chunk context amended by D50) | Owner | 2026-11-23 |
 | D4 | Embeddings run locally in Ollama: `nomic-embed-text` (768 dims), via OllamaSharp's `IEmbeddingGenerator`. Anthropic has no embedding model | Owner | 2026-11-23 |
 | D5 | Domain: Indian financial regulation; agent job: compliance review (feature description in, cited findings memo out, human approval before filing) | Owner | 2026-11-23 |
 | D6 | Corpus scope is **NBFCs**: RBI (NBFCs – KYC) Directions 2025 and RBI (NBFCs – Credit Facilities) Directions 2025 (Chapter III Digital Lending). RBI repealed the 2016 KYC Master Direction and the standalone Digital Lending Directions on 28 Nov 2025 (DOR.RRC.REC.302/33-01-010/2025-26) | Owner | 2026-11-23 |
@@ -65,6 +65,12 @@ product features for compliance.
 | D47 | Judge: Groundedness + Relevance (Microsoft.Extensions.AI.Evaluation.Quality) with `claude-haiku-4-5`; owner hand-checks 10 judgements (spec 0004) | Owner | 2026-11-23 |
 | D48 | Similarity floor = highest with no answerable question refused, minus 0.02 (spec 0004) | Owner | 2026-11-23 |
 | D49 | BM25 is the default keyword scoring, chosen from the golden-set results (recall@5 0.85 vs 0.80, MRR@10 0.772 vs 0.637, n = 20); the floor is 0.60 (spec 0004) | Owner | 2026-11-24 |
+| D50 | Chunk context is written by `claude-haiku-5-5` (released 2026-10-07; $0.10 / $0.50 per MTok, 512-token cache minimum), not `claude-haiku-4-5`. Amends D3 for chunk context only; the eval judge stays `claude-haiku-4-5` (spec 0005) | Owner | 2026-11-24 |
+| D51 | The chunker's heading defects in the RBC Directions are fixed in spec 0005; the context model gets each chunk's heading path, and the answer prompt (v3) gets each passage's heading | Owner | 2026-11-24 |
+| D52 | Generated chunk context is used for retrieval only (embedding and BM25), never sent to the answer model (spec 0005) | Owner | 2026-11-24 |
+| D53 | Contextual retrieval replaces the index in place and is compared with spec 0004's saved runs; a setting rebuilds without context (spec 0005) | Owner | 2026-11-24 |
+| D54 | A context-generation failure fails the document (old chunks stay); generated contexts are cached so a re-run resumes (spec 0005) | Owner | 2026-11-24 |
+| D55 | Spend cap for spec 0005's paid runs: $2 | Owner | 2026-11-24 |
 
 ## 3. Open questions
 
@@ -84,7 +90,7 @@ product features for compliance.
 | 0002 | Hybrid retrieval with RRF and `GET /search` | D1·3 |
 | 0003 | Answers with verified citations, abstention, answer cache | D1·4 |
 | 0004 | Golden set, eval runner, retrieval and answer metrics, BM25 (D40, D43), floor from data (D48), new RBC document (D41) | D1·5 |
-| 0005 | Contextual retrieval (Haiku context per chunk, re-embed), measured against 0004's baseline (D44) | D1·5 |
+| 0005 | Contextual retrieval (Haiku 5.5 context per chunk, re-embed) and heading fixes, measured against 0004's baseline (D44, D50–D55) | D1·5 |
 | 0006 | MCP server, tracing and production basics | D1·6 |
 
 Numbers are proposals; a spec gets its number when its spec PR is opened.
