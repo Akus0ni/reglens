@@ -5,8 +5,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project status
 
 RegLens is a .NET 10 API that answers questions about Indian NBFC regulation with verified citations and exposes
-itself as an MCP server. **Built so far: spec 0001, ingestion** (corpus → chunks with embeddings in Postgres). Next:
-spec 0002, hybrid retrieval. Plan, decisions (D*n*) and open questions (Q*n*): `docs/plan.md`. Specs: `docs/specs/`.
+itself as an MCP server. **Built so far: spec 0001 ingestion and spec 0002 hybrid retrieval** (`GET /search`). Next:
+spec 0003, answers with verified citations. Plan, decisions (D*n*) and open questions (Q*n*): `docs/plan.md`. Specs: `docs/specs/`.
 History: `docs/project-log.md`.
 
 ## Workflow — read first
@@ -35,7 +35,12 @@ dotnet test --project tests/RegLens.Domain.Tests -- --filter-class "*PassageSpli
 dotnet test --project tests/RegLens.Domain.Tests -- --filter-method "*KeepsACorrigendumWhole" # one test
 
 dotnet run --project src/RegLens.Ingest           # migrate + ingest; run from the repo root (corpus/ is relative)
+                                                  # the API never migrates: run this after pulling new migrations
 dotnet run --project src/RegLens.Ingest -- --force --document dpdp-rules-2025
+
+dotnet user-secrets set "ConnectionStrings:RegLens" "<same as above>" --project src/RegLens.Api
+dotnet run --project src/RegLens.Api              # http://127.0.0.1:5180 (5080 is the owner's AgencyOS)
+curl "http://127.0.0.1:5180/search?q=Rule%207&topK=5"
 
 ./scripts/protect-main.ps1                        # (re)apply the main ruleset; needs gh logged in as the owner
 scripts/delete-merged-branch.sh <branch> <pr>     # after the owner merges a PR
@@ -66,6 +71,11 @@ OllamaSharp, manifest) ← hosts `RegLens.Ingest` (console) and, later, `RegLens
   sub-clauses (`Para 5, part 3 of 14`) → `ChunkEmbedder` embeds through a bounded `Channel<T>` →
   `PostgresChunkStore` replaces a changed document in one transaction. Unchanged documents are skipped.
   Contextual retrieval (Haiku fills `chunks.context`) is planned for spec 0004.
+- **Search** (built, spec 0002, `GET /search`): `SearchRegulations` embeds `search_query: ` + question (falls back to
+  keyword-only with `degraded` if Ollama fails) → `PostgresChunkSearch` runs one SQL statement: pgvector top-40 and
+  full-text top-40 (OR of the question's lexemes; `tsv` covers context, heading, para_ref and content) fused with
+  RRF k = 60 → citations in the question ("Rule 7", "para 6") are looked up exactly and pinned first. Every hit
+  carries dense rank, keyword rank and fused score. The keyword side has no IDF yet (spec 0002 §10).
 - **Ask** (planned, `POST /ask`): HybridCache lookup → Ollama embeds the question → one SQL query fuses dense (pgvector HNSW)
   and keyword (`tsvector`) top-40 lists with RRF → abstain early if the best score is low → Sonnet answers from the
   chunks as delimited data with structured citations → a code verifier checks every citation → answer or

@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using Npgsql;
 using OllamaSharp;
 using RegLens.Application.Ingestion;
+using RegLens.Application.Search;
 using RegLens.Infrastructure.Corpus;
 using RegLens.Infrastructure.Embeddings;
 using RegLens.Infrastructure.Persistence;
@@ -25,10 +26,12 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddOptions<CorpusOptions>().BindConfiguration(CorpusOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
         services.AddOptions<OllamaOptions>().BindConfiguration(OllamaOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
         services.AddOptions<EmbeddingOptions>().BindConfiguration(EmbeddingOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
+        services.AddOptions<SearchOptions>().BindConfiguration(SearchOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
 
         services.AddSingleton(_ => BuildDataSource(configuration));
         services.AddSingleton<SqlMigrationRunner>();
         services.AddSingleton<IChunkStore, PostgresChunkStore>();
+        services.AddSingleton<IChunkSearch, PostgresChunkSearch>();
         services.AddSingleton<ICorpusCatalog, ManifestCatalog>();
         services.AddSingleton<IDocumentTextSource, PdfPigTextSource>();
 

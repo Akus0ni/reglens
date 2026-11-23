@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!-- Web host (D27): composition root only. Read side: it never applies migrations (RegLens.Ingest does). -->
+
+  <PropertyGroup>
+    <UserSecretsId>reglens-api</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RegLens.Application\RegLens.Application.csproj" />
+    <ProjectReference Include="..\RegLens.Infrastructure\RegLens.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>
