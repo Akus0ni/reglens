@@ -2,6 +2,18 @@
 
 Newest first. What was done, why, and the problems hit.
 
+## 2026-11-24 — Spec 0004: judge hand check (A6)
+
+- The owner delegated the 10-judgement hand check to Claude (`claude-opus-5-5`). Agreement with the Haiku judge:
+  10/10 within 1 point, 8/10 exact. This is a second-model check, not a human one: all three models are Claude,
+  and the judge's scores were visible. Rubrics were read from the evaluator package so both use the same scale.
+- Found while checking rbc-03: the chunker misses the two-line heading "I. Responsibilities of … Recovery Agents"
+  (the section regex accepts A–H only), so RBC Paras 98–101 are labelled as microfinance. The answer prompt sends no
+  headings, so the model could not tell Para 91 (microfinance, 9 a.m.–6 p.m.) from Para 100 (other loans,
+  8 a.m.–7 p.m.). Both need a spec.
+- `evals/results.md` and `evals/judge-check.md` are generated; re-running `report` or `judge-sheet` overwrites the
+  hand-added agreement and scores.
+
 ## 2026-11-24 — Spec 0004: golden set, evals and BM25 built
 
 - New corpus document ingested (124 chunks). The annex rule now accepts "Annex I – <title>" on one line; the other

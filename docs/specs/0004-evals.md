@@ -217,7 +217,7 @@ Golden set v1 (owner-reviewed, PR #11): 20 answerable, 10 unanswerable. Full tab
 | Citations dropped by the verifier | 0 |
 | Groundedness (judge, 1–5) | **4.89** (n = 18) |
 | Relevance (judge, 1–5) | **4.33** (n = 18); lowest rbc-01 = 3 |
-| Judge agreement with the owner | **pending**: owner fills `evals/judge-check.md` (A6) |
+| Judge agreement, hand check | **10/10 within 1 point** (8/10 exact). The owner delegated the check to Claude (`claude-opus-5-5`, 2026-11-24): a second-model check, not a human one, and not blind. Details: `evals/judge-check.md` |
 | Tokens / cost | 109,449 in / 11,282 out (29 Sonnet calls) = **$0.332**; judge not recorded (§9), estimated $0.15–0.25 |
 | p50 latency, model-calling answers | 4.3 s |
 

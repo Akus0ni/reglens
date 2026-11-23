@@ -53,6 +53,7 @@ Configuration **hybrid-bm25**, `claude-sonnet-5-5` effort Medium, judge `claude-
 | Groundedness, mean 1–5 (answered, judge) | 4.89 (n = 18) |
 | Relevance, mean 1–5 (answered, judge) | 4.33 (n = 18) |
 | Judge failures | 0 |
+| Judge agreement, hand check (10 judgements) | 10/10 within 1 point, 8/10 exact; checked by Claude `claude-opus-5-5`, delegated by the owner (`evals/judge-check.md`) |
 | Tokens (answers) | 109,449 in / 11,282 out |
 | Tokens (judge) | not recorded in this run |
 | Cost at list price | $0.332 for the answers; judge not recorded |
