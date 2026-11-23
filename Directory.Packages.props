@@ -1,0 +1,37 @@
+<Project>
+  <!-- Central Package Management (spec 0001, R1.2): no Version= on any PackageReference in a .csproj. -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <ItemGroup Label="Application">
+    <!-- 10.x on purpose: OllamaSharp 5.5.2 is built against Microsoft.Extensions.AI 10.8.0; 11.x is unverified with it. -->
+    <PackageVersion Include="Microsoft.Extensions.AI.Abstractions" Version="10.11.1" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.15" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.15" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.15" />
+  </ItemGroup>
+
+  <ItemGroup Label="Infrastructure">
+    <!-- Npgsql 10.x, not 11: Pgvector 0.3.2 is built against Npgsql 8.x and 11 is unverified (spec 0001, P7). -->
+    <PackageVersion Include="Npgsql" Version="10.0.4" />
+    <PackageVersion Include="Pgvector" Version="0.3.2" />
+    <PackageVersion Include="PdfPig" Version="0.1.16" />
+    <PackageVersion Include="OllamaSharp" Version="5.5.2" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.15" />
+    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.11.1" />
+    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.15" />
+    <PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="10.0.15" />
+  </ItemGroup>
+
+  <ItemGroup Label="Hosts">
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.15" />
+  </ItemGroup>
+
+  <ItemGroup Label="Tests">
+    <PackageVersion Include="xunit.v3" Version="4.0.3" />
+    <PackageVersion Include="AwesomeAssertions" Version="9.6.0" />
+    <PackageVersion Include="NSubstitute" Version="6.2.0" />
+    <PackageVersion Include="Testcontainers.PostgreSql" Version="4.17.0" />
+  </ItemGroup>
+</Project>

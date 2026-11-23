@@ -5,9 +5,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project status
 
 RegLens is a .NET 10 API that answers questions about Indian NBFC regulation with verified citations and exposes
-itself as an MCP server. **No code yet**: the repo holds an empty `RegLens.slnx`, the corpus in `corpus/`, and the
-workflow files. The first feature is spec 0001 (ingestion). Plan, decisions (D*n*) and open questions (Q*n*):
-`docs/plan.md`. History: `docs/project-log.md`.
+itself as an MCP server. **Built so far: spec 0001, ingestion** (corpus → chunks with embeddings in Postgres). Next:
+spec 0002, hybrid retrieval. Plan, decisions (D*n*) and open questions (Q*n*): `docs/plan.md`. Specs: `docs/specs/`.
+History: `docs/project-log.md`.
 
 ## Workflow — read first
 
@@ -24,16 +24,26 @@ workflow files. The first feature is spec 0001 (ingestion). Plan, decisions (D*n
 ## Commands
 
 ```powershell
-dotnet build RegLens.slnx                         # only the empty solution exists so far
-./scripts/protect-main.ps1                        # (re)apply the main ruleset; needs gh logged in as the owner
+docker compose up -d                              # Postgres+pgvector (127.0.0.1:5432) and Aspire dashboard (http://localhost:18888)
+ollama pull nomic-embed-text                      # Ollama runs natively on http://localhost:11434
+dotnet user-secrets set "ConnectionStrings:RegLens" "Host=localhost;Port=5432;Database=reglens;Username=reglens;Password=reglens-dev" --project src/RegLens.Ingest
 
-# Local infrastructure (from the sprint plan)
-docker run -d --name reglens-pg -e POSTGRES_PASSWORD=devpass -p 5432:5432 pgvector/pgvector:pg17
-docker run -d --name aspire-dashboard -p 18888:18888 -p 4317:18889 mcr.microsoft.com/dotnet/aspire-dashboard:latest
-ollama pull nomic-embed-text                      # Ollama serves on http://localhost:11434
+dotnet build RegLens.slnx                         # must be 0 warnings (warnings are errors)
+dotnet test                                       # all tests; Docker must be running (Testcontainers)
+dotnet test --project tests/RegLens.Domain.Tests                                   # one project
+dotnet test --project tests/RegLens.Domain.Tests -- --filter-class "*PassageSplitterTests"   # one class
+dotnet test --project tests/RegLens.Domain.Tests -- --filter-method "*KeepsACorrigendumWhole" # one test
+
+dotnet run --project src/RegLens.Ingest           # migrate + ingest; run from the repo root (corpus/ is relative)
+dotnet run --project src/RegLens.Ingest -- --force --document dpdp-rules-2025
+
+./scripts/protect-main.ps1                        # (re)apply the main ruleset; needs gh logged in as the owner
+scripts/delete-merged-branch.sh <branch> <pr>     # after the owner merges a PR
 ```
 
-Add the test commands (including how to run a single test) here when the first test project lands.
+The dev password `reglens-dev` is the compose default for a localhost-only container; override with
+`REGLENS_PG_PASSWORD`. The first embedding after Ollama unloads the model takes ~30 s (model load), which is why
+`Ollama:AttemptTimeoutSeconds` defaults to 60.
 
 ## Environment
 
@@ -41,18 +51,27 @@ Add the test commands (including how to run a single test) here when the first t
 - Ollama is installed on D:, with models in `D:\OllamaModels` (`OLLAMA_MODELS` user variable).
 - `ANTHROPIC_API_KEY` comes from the environment or user-secrets, never from `appsettings*.json`.
 
-## Architecture (planned, see `docs/plan.md` D9–D16)
+## Architecture
 
-- **Ingest** (offline): PdfPig extracts each `corpus/manifest.json` document (only `ingest_pages` where set) → chunks
-  along paragraph/clause numbers with doc id, paragraph ref and page → Haiku adds 50–100 tokens of context per chunk
-  (document prompt-cached) → Ollama embeds through a bounded `Channel<T>` → idempotent upsert into Postgres `chunks`
-  keyed on content hash.
-- **Ask** (`POST /ask`): HybridCache lookup → Ollama embeds the question → one SQL query fuses dense (pgvector HNSW)
+Clean architecture (D22), dependencies pointing inward and enforced by `tests/RegLens.Architecture.Tests`:
+`RegLens.Domain` (pure: corpus types, cleaning, chunking) ← `RegLens.Application` (use cases + the ports they own,
+`Microsoft.Extensions.AI` abstractions) ← `RegLens.Infrastructure` (Npgsql/pgvector, SQL migrations, PdfPig,
+OllamaSharp, manifest) ← hosts `RegLens.Ingest` (console) and, later, `RegLens.Api`. Hosts are composition roots only.
+
+- **Ingest** (built, spec 0001): `ManifestCatalog` verifies every file's size and SHA-256 before any write →
+  PdfPig `ContentOrderTextExtractor` (only `ingest_pages`) → `TextCleaner` drops TOC lines, page numbers, non-Latin
+  lines and repeated page headers → a structure strategy per document (`manifest.json` `structure`) cuts one passage
+  per numbered paragraph/rule with its heading trail; numbers and chapters must arrive in order, which keeps
+  table-of-contents leftovers and stray numbered lines out → passages over 500 estimated tokens split at
+  sub-clauses (`Para 5, part 3 of 14`) → `ChunkEmbedder` embeds through a bounded `Channel<T>` →
+  `PostgresChunkStore` replaces a changed document in one transaction. Unchanged documents are skipped.
+  Contextual retrieval (Haiku fills `chunks.context`) is planned for spec 0004.
+- **Ask** (planned, `POST /ask`): HybridCache lookup → Ollama embeds the question → one SQL query fuses dense (pgvector HNSW)
   and keyword (`tsvector`) top-40 lists with RRF → abstain early if the best score is low → Sonnet answers from the
   chunks as delimited data with structured citations → a code verifier checks every citation → answer or
   "not found". `GET /search` and the MCP `search_regulations` tool stop after retrieval and never call Anthropic.
-- **MCP** (`/mcp`): read-only tools over the same services, consumed by the Day 2 Python agent (separate repo).
-- **Evals**: golden set + retrieval metrics (no LLM) + Haiku-judged groundedness/relevance; numbers go to
+- **MCP** (planned, `/mcp`): read-only tools over the same services, consumed by the Day 2 Python agent (separate repo).
+- **Evals** (planned): golden set + retrieval metrics (no LLM) + Haiku-judged groundedness/relevance; numbers go to
   `evals/results.md` with n, date and model IDs.
 - Model-call boundary to keep: Ollama only makes vectors; Anthropic only reads and writes text; Postgres never calls
   a model.

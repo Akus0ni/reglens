@@ -1,0 +1,30 @@
+# Local infrastructure for RegLens (spec 0001, R1.5). Ollama runs natively, not here.
+# Ports are bound to 127.0.0.1 only. Override the dev password with REGLENS_PG_PASSWORD.
+name: reglens
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_DB: reglens
+      POSTGRES_USER: reglens
+      POSTGRES_PASSWORD: ${REGLENS_PG_PASSWORD:-reglens-dev}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - reglens-pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U reglens -d reglens"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  aspire-dashboard:
+    image: mcr.microsoft.com/aspire/dashboard:latest
+    ports:
+      - "127.0.0.1:18888:18888"   # UI
+      - "127.0.0.1:4317:18889"    # OTLP gRPC
+      - "127.0.0.1:4318:18890"    # OTLP HTTP
+
+volumes:
+  reglens-pg:
