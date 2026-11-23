@@ -8,6 +8,12 @@ namespace RegLens.Domain.Chunking;
 /// </summary>
 public sealed class DocumentChunker
 {
+    /// <summary>
+    /// Changes whenever any strategy cuts the same pages differently, so stored documents are re-ingested (spec 0005, P6).
+    /// 2 = the heading and paragraph fixes H1–H5 of spec 0005.
+    /// </summary>
+    public const string Version = "chunker 2";
+
     private readonly PassageSplitter _splitter;
     private readonly Dictionary<DocumentStructure, IChunkingStrategy> _strategies;
 

@@ -35,7 +35,7 @@ public class DocumentChunkerTests
         var chunks = DocumentChunker.CreateDefault().Chunk(Document("doc-a"), [new PageText(1, Paragraphs)]);
 
         chunks.Should().AllSatisfy(c =>
-            c.Content.Split('\n').Count(line => StructureMarkers.UnitNumber(line) is not null).Should().BeLessThanOrEqualTo(1));
+            c.Content.Split('\n').Count(line => StructureMarkers.Unit(line) is not null).Should().BeLessThanOrEqualTo(1));
     }
 
     [Fact]
