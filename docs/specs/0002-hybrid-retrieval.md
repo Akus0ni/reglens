@@ -188,7 +188,7 @@ Record in `docs/project-log.md`: p50 and p95 latency over 20 warm `/search` call
 |-------|--------|-----|
 | R2.11 | Port **5180**, not 5080 (owner's decision, D31) | 5080 is used by the owner's AgencyOS.Server; the tracker's Day 2 MCP URL now says 5180 |
 | R2.13 | A `topK` that cannot be parsed (`topK=abc`) also returns 400 Problem Details | In Development, minimal APIs threw on binding failures and the exception handler turned that into a 500; `RouteHandlerOptions.ThrowOnBadRequest = false` |
-| A5 | **Fails as written** (see §10) | Para 13 is dense rank 3 but fused rank 21: OR-matched common words ("loan", "app") put other chunks in both lists, and RRF favours chunks in both. `ts_rank_cd` has no IDF. Decision left to the owner |
+| A5 | **Fails as written** (see §10) | Para 13 is dense rank 3 but fused rank 21: OR-matched common words ("loan", "app") put other chunks in both lists, and RRF favours chunks in both. `ts_rank_cd` has no IDF. **Owner, 2026-11-23: accepted as a known gap; IDF weighting is evaluated in spec 0004 (D40)** |
 | A7 | Passes, but a degraded search took 12.3 s | The standard resilience handler retries the unreachable Ollama before giving up; a fail-fast path is a follow-up |
 
 ## 10. Results (2026-11-23, live API on the 389-chunk corpus, nomic-embed-text:latest)
