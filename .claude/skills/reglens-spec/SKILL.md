@@ -32,13 +32,25 @@ blog posts.
    criteria the owner can check. New owner decisions go in the spec's Decisions table *and* `docs/plan.md`.
 3. **Spec PR.** Commit `docs(spec): NNNN short name`, push, `gh pr create` with the PR template. Then **stop** and tell
    the owner the PR link. Do not write feature code until the owner has approved and merged the spec PR.
-4. **Code branch.** After the merge: `git switch main && git pull`, then `git switch -c feat/NNNN-short-name`.
+4. **Code branch.** After the merge, clean up (below), then `git switch -c feat/NNNN-short-name`.
 5. **Build to the spec.** Every requirement is implemented or explicitly deferred in the PR body. If the spec turns
    out wrong, change the spec in the same PR and call it out; don't silently diverge.
 6. **Code PR.** Conventional Commits (`feat(ingest): …`, `fix(retrieval): …`, `test: …`, `docs: …`, `chore: …`).
    PR title `feat: NNNN short name`; body links `docs/specs/NNNN-…md`, lists each R-number as done/deferred, and shows
    how it was verified (commands run, test output, eval numbers with n). Update `docs/project-log.md` in the same PR.
 7. **Never merge.** Only the owner merges. Don't run `gh pr merge`, don't push to `main`, don't use `--admin`.
+
+**After every merge**, delete the branch. GitHub deletes the remote branch automatically (repo setting
+`delete_branch_on_merge`). Locally:
+
+```bash
+gh pr view <n> --json state --jq .state      # must be MERGED
+git switch main && git pull --ff-only && git fetch --prune
+git diff --stat main <branch>                 # must be empty: the PR's content is on main
+git branch -D <branch>                        # -D, because squash merges make -d refuse
+```
+
+If the diff is not empty, stop and ask: the branch has work that did not reach `main`.
 
 Small fixes that change no behaviour (typos, docs, tooling) may skip the spec: branch `chore/…` or `fix/…`, one PR.
 Anything that changes what the API returns, what is stored, or what a model is asked is a feature and needs a spec.

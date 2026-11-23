@@ -36,6 +36,7 @@ product features for compliance.
 | D18 | `main` protection: ruleset requires a PR approved by a code owner; direct push, force-push and deletion blocked; admin bypass only through a PR (`scripts/protect-main.ps1`) | Owner | 2026-11-23 |
 | D19 | Local guard: a Claude Code PreToolUse hook blocks `git commit`/`git push` on `main`, pushes to `main`, and `gh pr merge` | Owner | 2026-11-23 |
 | D20 | Docs layout mirrors InvoiceGen: `docs/plan.md`, `docs/specs/NNNN-name.md`, `docs/project-log.md`, `.claude/skills/reglens-spec/` | Owner | 2026-11-23 |
+| D21 | Merged branches are deleted: GitHub `delete_branch_on_merge` is on for the remote; locally, Claude deletes the branch after checking its content is on `main` (squash merges need `git branch -D`) | Owner | 2026-11-23 |
 
 ## 3. Open questions
 

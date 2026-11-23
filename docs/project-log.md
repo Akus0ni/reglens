@@ -2,6 +2,12 @@
 
 Newest first. What was done, why, and the problems hit.
 
+## 2026-11-23 — Branch cleanup
+
+- PR #1 merged (squash, b070fbe). Turned on the repo setting `delete_branch_on_merge`. The local branch needed
+  `git branch -D` because a squash merge creates a new commit; the skill now checks `git diff --stat main <branch>`
+  is empty before deleting (D21).
+
 ## 2026-11-23 — Repo workflow
 
 - Added `CLAUDE.md`, the `reglens-spec` skill with a spec template, `docs/plan.md`, this log, `CODEOWNERS`, a PR
