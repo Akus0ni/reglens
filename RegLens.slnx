@@ -1,2 +1,12 @@
 <Solution>
+  <Folder Name="/tests/">
+    <Project Path="tests/RegLens.Application.Tests/RegLens.Application.Tests.csproj" />
+    <Project Path="tests/RegLens.Architecture.Tests/RegLens.Architecture.Tests.csproj" />
+    <Project Path="tests/RegLens.Domain.Tests/RegLens.Domain.Tests.csproj" />
+    <Project Path="tests/RegLens.Infrastructure.Tests/RegLens.Infrastructure.Tests.csproj" />
+  </Folder>
+  <Project Path="src/RegLens.Application/RegLens.Application.csproj" />
+  <Project Path="src/RegLens.Domain/RegLens.Domain.csproj" />
+  <Project Path="src/RegLens.Infrastructure/RegLens.Infrastructure.csproj" />
+  <Project Path="src/RegLens.Ingest/RegLens.Ingest.csproj" />
 </Solution>

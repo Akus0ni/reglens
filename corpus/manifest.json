@@ -21,6 +21,7 @@
       "pages": 96,
       "sha256": "c7c2dbdaa1917169a7c5e7b369058d6502b171b81d6a69a4b061d9391fa7cc77",
       "language": "English (cover lines in Hindi)",
+      "structure": "rbi-directions",
       "notes": "Replaces the Master Direction – KYC Direction, 2016 for NBFCs (repealed 2025-11-28, circular DOR.RRC.REC.302/33-01-010/2025-26)."
     },
     {
@@ -38,6 +39,7 @@
       "pages": 54,
       "sha256": "0b5f49f8de6cc832e17de1298fd705764c907b819d9e2db97b4af3b909b5ccb7",
       "language": "English (cover lines in Hindi)",
+      "structure": "rbi-directions",
       "notes": "Chapter III is Digital Lending; it carries the rules of the repealed RBI (Digital Lending) Directions, 2025 for NBFCs."
     },
     {
@@ -55,6 +57,7 @@
       "pages": 41,
       "sha256": "eabc7d05e013144615d78ddc0e8b9c9aac1920e814f4fad38ce6560951f5aa08",
       "language": "Bilingual: pages 1-23 Hindi, pages 24-41 English",
+      "structure": "gazette-rules",
       "ingest_pages": "24-41",
       "notes": "Ingest the English pages only. Corrections are in dpdp-rules-2025-corrigendum."
     },
@@ -73,6 +76,7 @@
       "pages": 1,
       "sha256": "8f8d9526b511801889f8ae022b6d7c5db449283e90fe32792e5896314b32f994",
       "language": "English (masthead bilingual)",
+      "structure": "corrigendum",
       "corrects": "dpdp-rules-2025",
       "notes": "Eight wording fixes on Gazette pages 24-38 of G.S.R. 846(E); no material change."
     }

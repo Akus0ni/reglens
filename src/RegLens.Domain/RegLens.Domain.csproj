@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Pure domain (D22): no project references and no packages beyond the BCL. Enforced by RegLens.Architecture.Tests. -->
+
+</Project>
