@@ -47,6 +47,15 @@ product features for compliance.
 | D29 | Every search hit carries its dense rank, keyword rank and fused score (spec 0002) | Owner | 2026-11-23 |
 | D30 | No document filter in spec 0002; a filter gets its own spec using pgvector iterative scans | Owner | 2026-11-23 |
 | D31 | `RegLens.Api` listens on 127.0.0.1:**5180** (5080 belongs to the owner's AgencyOS.Server) | Owner | 2026-11-23 |
+| D32 | Answer citations come from a JSON schema plus our verifier, not Claude's built-in Citations (the API rejects Citations combined with structured outputs) (spec 0003) | Owner | 2026-11-23 |
+| D33 | Abstention: Claude decides; the Claude call is skipped when the best similarity is below a floor (0.55 to start, tuned in 0004) (spec 0003) | Owner | 2026-11-23 |
+| D34 | A citation that fails verification is dropped and counted; no verified citation left → abstain as "unverified" (spec 0003) | Owner | 2026-11-23 |
+| D35 | Answers are served by `POST /ask` with a JSON body `{question, topK?}` (spec 0003) | Owner | 2026-11-23 |
+| D36 | Answer model effort `medium`, configurable; 0004 compares low / medium / high (spec 0003) | Owner | 2026-11-23 |
+| D37 | `HybridCache` with Redis as the second-level cache; Redis joins `docker-compose.yml` (spec 0003) | Owner | 2026-11-23 |
+| D38 | With vector search degraded, `/ask` answers from keyword-only hits, flagged, not cached (spec 0003) | Owner | 2026-11-23 |
+| D39 | Quotes are verified as a normalised substring (whitespace, quote and dash variants equal; case and words exact) (spec 0003) | Owner | 2026-11-23 |
+| D40 | Spec 0002's A5 gap is accepted; IDF / BM25-style keyword weighting is evaluated in spec 0004 against the golden set | Owner | 2026-11-23 |
 
 ## 3. Open questions
 
@@ -65,7 +74,7 @@ product features for compliance.
 | 0001 | Ingest the corpus: extract, chunk by paragraph, embed, upsert | D1·2 |
 | 0002 | Hybrid retrieval with RRF and `GET /search` | D1·3 |
 | 0003 | Answers with verified citations, abstention, answer cache | D1·4 |
-| 0004 | Golden set and evals (three configs, contextual retrieval) | D1·5 |
+| 0004 | Golden set and evals (three configs, contextual retrieval); keyword IDF weighting (D40); tune the similarity floor and effort (D33, D36) | D1·5 |
 | 0005 | MCP server, tracing and production basics | D1·6 |
 
 Numbers are proposals; a spec gets its number when its spec PR is opened.

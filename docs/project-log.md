@@ -2,6 +2,16 @@
 
 Newest first. What was done, why, and the problems hit.
 
+## 2026-11-23 — Spec 0003 drafted: answers with verified citations
+
+- PR #8 merged; the owner accepted spec 0002's A5 gap and moved IDF weighting to spec 0004 (D40).
+- Checked before writing: Claude's built-in Citations cannot be combined with structured outputs (400), so answers use
+  a JSON schema plus our own verifier (D32). Best cosine similarity for 5 in-scope and 5 out-of-scope questions
+  overlaps (0.630–0.850 vs 0.536–0.716, n = 10), so Claude decides abstention and a 0.55 floor only skips the call for
+  clearly unrelated questions (D33).
+- Owner decisions D32–D40: drop failed citations, `POST /ask`, effort medium, HybridCache + Redis, answer when
+  degraded, normalised quote matching.
+
 ## 2026-11-23 — Spec 0002: hybrid retrieval built
 
 - `RegLens.Api` with `GET /search`, migration 002 (heading + para_ref in `tsv`), citation lookup, keyword-only
