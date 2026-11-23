@@ -25,6 +25,7 @@ public class PostgresPassageReaderTests(PostgresFixture postgres)
         passages.Select(p => p.ParaRef).Should().Equal("Para 2", "Para 1");
         passages[1].Content.Should().HaveLength(400, "the full text, not the 300-character excerpt");
         passages[0].DocumentTitle.Should().Be("Test Directions");
+        passages[0].Heading.Should().Be("Heading", "prompt v3 sends it (spec 0005, R5.14)");
         (await new PostgresPassageReader(dataSource).GetAsync([], Ct)).Should().BeEmpty();
     }
 
