@@ -37,13 +37,17 @@ product features for compliance.
 | D19 | Local guard: a Claude Code PreToolUse hook blocks `git commit`/`git push` on `main`, pushes to `main`, and `gh pr merge` | Owner | 2026-11-23 |
 | D20 | Docs layout mirrors InvoiceGen: `docs/plan.md`, `docs/specs/NNNN-name.md`, `docs/project-log.md`, `.claude/skills/reglens-spec/` | Owner | 2026-11-23 |
 | D21 | Merged branches are deleted: GitHub `delete_branch_on_merge` is on for the remote; locally, Claude deletes the branch after checking its content is on `main` (squash merges need `git branch -D`) | Owner | 2026-11-23 |
+| D22 | Clean architecture, 4 layers + 2 hosts: Domain ← Application ← Infrastructure; hosts `RegLens.Ingest` (console) and `RegLens.Api` (web) are composition roots. SOLID; no speculative interfaces (spec 0001) | Owner | 2026-11-23 |
+| D23 | Ingestion runs from both the console host and an API trigger, through one use case (resolves Q2; spec 0001) | Owner | 2026-11-23 |
+| D24 | Schema via versioned SQL scripts applied in order and recorded in `schema_version` (spec 0001) | Owner | 2026-11-23 |
+| D25 | Build and test conventions mirror InvoiceGen: `global.json` + Microsoft.Testing.Platform, Central Package Management, `Directory.Build.props` (warnings as errors), xUnit v3, AwesomeAssertions, NSubstitute, Testcontainers (spec 0001) | Owner | 2026-11-23 |
+| D26 | Local infrastructure via `docker-compose.yml` (pgvector Postgres + standalone Aspire dashboard); Ollama runs natively (spec 0001) | Owner | 2026-11-23 |
 
 ## 3. Open questions
 
 | # | Question | Blocks |
 |---|----------|--------|
 | Q1 | Add the DPDP Act 2023 to the corpus? (plan says "if time allows") | Golden-set questions on consent |
-| Q2 | Ingestion as a separate console project, or a hosted service inside the API? | Spec 0001 |
 | Q3 | How is the API key provisioned and checked (user-secrets, header name, rotation)? | Spec 0005 |
 | Q4 | Name and visibility of the Day 2 agent repo | Day 2 |
 | Q5 | Langfuse Cloud (Hobby) or self-hosted for agent traces | Day 2 tracing |
