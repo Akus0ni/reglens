@@ -2,6 +2,31 @@
 
 Newest first. What was done, why, and the problems hit.
 
+## 2026-11-23 — Spec 0001: ingestion built
+
+- Clean-architecture solution (D22), InvoiceGen conventions (D25), `docker-compose.yml` (D26), versioned SQL
+  migrations (D24), console host (D23; the API trigger comes with spec 0005, P1).
+- **Measurements** (corpus manifest checked 2026-11-23; Ollama `nomic-embed-text:latest`, digest `0a109f422b47`,
+  context 2048; full run with the model already loaded):
+
+  | Document | Chunks | Tokens min / median / max | Time |
+  |----------|--------|---------------------------|------|
+  | rbi-nbfc-kyc-2025 | 167 | 14 / 300 / 500 | 16.9 s |
+  | rbi-nbfc-credit-facilities-2025 | 131 | 3 / 106 / 490 | 10.5 s |
+  | dpdp-rules-2025 (pages 24–41) | 90 | 13 / 110 / 496 | 2.0 s |
+  | dpdp-rules-2025-corrigendum | 1 | 333 | 0.1 s |
+  | **Total** | **389** | | **29.5 s** |
+
+- A7: second run skipped all four documents; `chunks` stayed at 389. A9: every vector has 768 dimensions.
+- A8 (automated part): for 10 random chunks (`setseed(0.42)`), the text was found on the recorded pages and the
+  reference matches the paragraph number: 10/10. The owner's reading check is pending in the PR.
+- Problems hit: the first embedding call after Ollama unloads the model took 32.3 s (later calls ≈ 0.1 s), so the
+  standard 10 s attempt timeout failed every cold start; now 60 s and configurable. The real corpus exposed
+  table-of-contents leftovers, wrapped titles and schedule captions becoming tiny chunks; fixed with ordered
+  chapters and intro folding (spec 0001 §9). Old `reglens-pg` / `aspire-dashboard` containers from the tracker
+  held the ports; removed with the owner's go-ahead.
+- Tests: 66 (41 Domain, 10 Application, 12 Infrastructure on a pgvector Testcontainer, 3 architecture).
+
 ## 2026-11-23 — Branch cleanup
 
 - PR #1 merged (squash, b070fbe). Turned on the repo setting `delete_branch_on_merge`. The local branch needed

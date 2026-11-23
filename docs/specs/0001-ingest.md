@@ -1,6 +1,6 @@
 # Spec 0001 — Ingest the corpus
 
-> Status: **Draft — awaiting owner approval** · Created: 2026-11-23 · Owner: @Akus0ni
+> Status: **Approved (PR #3, 2026-11-23) · Implemented in `feat/0001-ingest`** · Created: 2026-11-23 · Owner: @Akus0ni
 > Depends on: none (first code) · Blocked by open questions: none (see §8 for choices to confirm)
 > Sprint phase: D1·2 (plus the solution scaffold and local infrastructure)
 
@@ -94,7 +94,7 @@ plain text (known limitation); any Anthropic API call.
 
 | ID | Requirement |
 |----|-------------|
-| R1.10 | The manifest is read into domain objects. A missing file, a size or SHA-256 mismatch, or an unknown field shape stops ingestion **before any write**, naming the document |
+| R1.10 | Each manifest entry names its `structure` (`rbi-directions`, `gazette-rules`, `corrigendum`). The manifest is read into domain objects. A missing file, a size or SHA-256 mismatch, or an unknown field shape stops ingestion **before any write**, naming the document |
 | R1.11 | Text comes from PdfPig's `ContentOrderTextExtractor`, never `page.Text`. Only `ingest_pages` are read when the manifest sets them (DPDP Rules: 24–41) |
 | R1.12 | Cleaning removes table-of-contents lines (dotted leaders followed by a page number), standalone page numbers, lines that are mostly non-Latin script, and repeated headers; it keeps paragraph and clause numbers intact. Page numbers are kept as metadata |
 
@@ -102,7 +102,7 @@ plain text (known limitation); any Anthropic API call.
 
 | ID | Requirement |
 |----|-------------|
-| R1.13 | RBI documents: a chunk starts at each numbered paragraph `N.` and carries a heading trail `Chapter III – Digital Lending › A. General Requirements …`. `para_ref` is `Para N` (and `Para N(k)` for split parts). Annexes get `Annex I`, `Annex II` … with their own numbering |
+| R1.13 | RBI documents: a chunk starts at each numbered paragraph `N.` and carries a heading trail `Chapter III – Digital Lending › A. General Requirements …`. `para_ref` is `Para N` (and `Para N, part k of m` for split parts; `Para N(k)` would read as sub-clause k). Annexes get `Annex I`, `Annex II` … with their own numbering |
 | R1.14 | DPDP Rules: a chunk starts at each rule `N. Title. —`; `para_ref` is `Rule N`. Schedules get `First Schedule` … with their item numbers. The corrigendum is one chunk, `para_ref` `Corrigendum` |
 | R1.15 | A chunk over 500 estimated tokens (P2, P3) splits at the last sub-clause boundary (`(1)`, `(i)`, `(a)`) before the limit; each part repeats the paragraph's opening line so it stands alone. A chunk never spans two paragraph numbers |
 | R1.16 | Every chunk records `page_start` and `page_end` from the source PDF |
@@ -114,7 +114,7 @@ plain text (known limitation); any Anthropic API call.
 |----|-------------|
 | R1.18 | Embeddings come from OllamaSharp's `OllamaApiClient` used as `Microsoft.Extensions.AI` `IEmbeddingGenerator<string, Embedding<float>>`, model `nomic-embed-text`. The input is `"search_document: " + content` (the model card's task prefix). A vector that is not 768 long is an error |
 | R1.19 | Chunks flow through a **bounded** `Channel<T>` (default capacity 32) to 2 embedding consumers (configurable 1–4), so a slow Ollama slows the reader instead of filling memory |
-| R1.20 | The Ollama `HttpClient` uses `AddStandardResilienceHandler()` (retry with backoff, timeout, circuit breaker) |
+| R1.20 | The Ollama `HttpClient` uses `AddStandardResilienceHandler()` (retry with backoff, timeout, circuit breaker), with the per-attempt timeout configurable (default 60 s) because a cold model load takes about 30 s |
 | R1.21 | Per document, in one transaction: unchanged SHA-256 → skip; new or changed → upsert the `documents` row, delete its old chunks, insert the new ones (P5). Inserts are `ON CONFLICT (content_hash) DO NOTHING` |
 | R1.22 | Vectors are written through the `Pgvector` package (`NpgsqlDataSourceBuilder.UseVector()`) |
 
@@ -197,7 +197,22 @@ estimate min / median / max, total ingest time, and the A8 spot-check result (k 
 |---|----------|--------|
 | — | Confirm or change P1–P8 by approving or commenting on this PR | Code PR for 0001 |
 
-## 9. Sources (checked 2026-11-23)
+## 9. Changes made while building
+
+Recorded here so the spec and the code agree (skill rule: change the spec in the same PR, never silently diverge).
+
+| Where | Change | Why |
+|-------|--------|-----|
+| R1.10 | Manifest entries gained a `structure` field | Choosing the chunking strategy from an explicit field beats guessing from ids or titles |
+| R1.13 | Split parts are `Para N, part k of m`, not `Para N(k)` | `Para 26(2)` already means sub-clause (2) in a citation |
+| R1.13–R1.14 | Chapters must arrive in order; a short intro (≤ 2 lines, < 30 tokens) after a heading is folded into the heading; RBI sub-sections like `B.1` join the trail; DPDP schedule parts (`PART A`) restart item numbers | Found on the real corpus: wrapped table-of-contents entries, wrapped chapter titles and schedule captions were becoming one-line chunks |
+| R1.20 | Ollama attempt timeout 60 s (configurable) instead of the standard 10 s | Measured: first call after a model unload took 32.3 s, later calls ≈ 0.1 s |
+| §5 | `Microsoft.Extensions.AI.Abstractions` 10.11.1, not 11.0.1 | OllamaSharp 5.5.2 is built against 10.8.0; 11.x is unverified with it |
+| §5 | `IChunkStore` reports `Missing` / `Outdated` / `Current` instead of a yes/no | A changed document must be reported as replaced, not ingested |
+| Known limitation | An annex whose whole content is a short title (CF Annex I; Annex II, which is deleted) becomes heading text only, with no chunk | Follows from the intro-folding rule; nothing citable is lost |
+| Follow-up | The heading trail is stored but not part of the embedding or `tsv` | Kept to the spec; whether adding it helps is a question for the spec 0004 evals |
+
+## 10. Sources (checked 2026-11-23)
 
 - PdfPig README: use `ContentOrderTextExtractor` for RAG, not `page.Text` — https://github.com/UglyToad/PdfPig
 - pgvector .NET README (Npgsql): `UseVector()`, `Vector`, `CREATE EXTENSION`, `ReloadTypes()` — https://github.com/pgvector/pgvector-dotnet
