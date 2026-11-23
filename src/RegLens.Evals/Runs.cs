@@ -19,8 +19,18 @@ public sealed record EvalConfiguration(string Name, SearchMode Mode, KeywordScor
         ?? throw new ArgumentException($"Unknown configuration '{name}'. Use one of: {string.Join(", ", All.Select(c => c.Name))}.");
 }
 
-/// <summary>What every run records about where its numbers came from (P10).</summary>
-public sealed record RunInfo(string Kind, string Config, DateTimeOffset StartedUtc, string Commit, string EmbeddingModel, string GoldenSetVersion);
+/// <summary>
+/// What every run records about where its numbers came from (spec 0004, P10). <paramref name="Pipeline"/> is how the
+/// index was built (spec 0005, R5.15); null in runs saved before it was recorded.
+/// </summary>
+public sealed record RunInfo(
+    string Kind,
+    string Config,
+    DateTimeOffset StartedUtc,
+    string Commit,
+    string EmbeddingModel,
+    string GoldenSetVersion,
+    string? Pipeline = null);
 
 public sealed record RetrievalQuestion(
     string Id,

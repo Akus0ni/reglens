@@ -131,13 +131,23 @@ if (missing.Count > 0)
     return 1;
 }
 
+// A run is only comparable if the whole index was built one way (spec 0005, R5.15).
+var pipelines = await IndexPipelinesAsync(services.GetRequiredService<NpgsqlDataSource>(), cancellation.Token).ConfigureAwait(false);
+if (pipelines.Count != 1)
+{
+    await Console.Error.WriteLineAsync(
+        $"The index mixes pipelines ({string.Join(" | ", pipelines)}); re-ingest so every document has the same one.").ConfigureAwait(false);
+    return 1;
+}
+
 var info = new RunInfo(command.Name, command.Config.Name, DateTimeOffset.UtcNow, GitCommit(),
-    builder.Configuration["Ollama:EmbeddingModel"] ?? "?", golden.Version.ToString(CultureInfo.InvariantCulture));
+    builder.Configuration["Ollama:EmbeddingModel"] ?? "?", golden.Version.ToString(CultureInfo.InvariantCulture), pipelines[0]);
 
 switch (command.Name)
 {
     case "check":
         Console.WriteLine($"Golden set v{golden.Version}: {golden.Questions.Count} questions, every expected reference is in the index.");
+        Console.WriteLine($"Pipeline: {info.Pipeline}");
         return 0;
 
     case "retrieval":
@@ -170,6 +180,19 @@ switch (command.Name)
 
     default:
         return 2;
+}
+
+static async Task<List<string>> IndexPipelinesAsync(NpgsqlDataSource dataSource, CancellationToken cancellationToken)
+{
+    await using var command = dataSource.CreateCommand("SELECT DISTINCT pipeline FROM documents ORDER BY pipeline");
+    await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+    var pipelines = new List<string>();
+    while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
+    {
+        pipelines.Add(reader.GetString(0));
+    }
+
+    return pipelines;
 }
 
 static string GitCommit()

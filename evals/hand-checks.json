@@ -1,0 +1,10 @@
+{
+  "_comment": "Rows Report adds to an answer run's table; keyed by the run's start time (spec 0004 A6, spec 0005 R5.15).",
+  "checks": [
+    {
+      "answerRunStartedUtc": "2026-11-23T18:25:43Z",
+      "metric": "Judge agreement, hand check (10 judgements)",
+      "value": "10/10 within 1 point, 8/10 exact; checked by Claude `claude-opus-5-5`, delegated by the owner (`evals/judge-check-0004.md`)"
+    }
+  ]
+}
