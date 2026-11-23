@@ -6,16 +6,27 @@ Agreement = your score within 1 point of the judge's. Leave a note where you dis
 
 | # | Question | Metric | Judge | Owner | Note |
 |---|----------|--------|-------|-------|------|
-| 1 | rbc-01 | Relevance | 3 | | |
-| 2 | kyc-01 | Relevance | 4 | | |
-| 3 | cf-01 | Groundedness | 5 | | |
-| 4 | dpdp-02 | Relevance | 4 | | |
-| 5 | rbc-02 | Groundedness | 5 | | |
-| 6 | kyc-02 | Relevance | 4 | | |
-| 7 | cf-02 | Groundedness | 5 | | |
-| 8 | dpdp-03 | Relevance | 5 | | |
-| 9 | rbc-03 | Groundedness | 4 | | |
-| 10 | kyc-03 | Relevance | 4 | | |
+| 1 | rbc-01 | Relevance | 3 | 3 | Agree: gives one KFS element (pre-payment charges) and says the rest is missing; RBC Para 29 / Annex I hold the contents (retrieval miss) |
+| 2 | kyc-01 | Relevance | 4 | 4 | Agree: all of Para 45(1)(i)–(v) and 45(2), nothing extra |
+| 3 | cf-01 | Groundedness | 5 | 5 | Agree: matches Para 13(1) exactly |
+| 4 | dpdp-02 | Relevance | 4 | 4 | Agree: Rule 3(a)–(c) in full, no elaboration |
+| 5 | rbc-02 | Groundedness | 5 | 5 | Agree: every claim is in Para 30 (dates, exclusions, penal charges, interest on unpaid EMI) |
+| 6 | kyc-02 | Relevance | 4 | 4 | Agree: Para 41(1), six months |
+| 7 | cf-02 | Groundedness | 5 | 5 | Agree: matches Para 11(1)–(2) |
+| 8 | dpdp-03 | Relevance | 5 | 4 | Within 1: a complete restatement of Rule 6(1)(a)–(g); I see no insight beyond the rule, which is what 5 needs |
+| 9 | rbc-03 | Groundedness | 4 | 5 | Within 1: the judge marked it down for not settling the two windows, but the passage text alone cannot settle them. Para 91 sits under H.4 (microfinance) and Para 100 says it excludes microfinance; the prompt sends no headings (see note below) |
+| 10 | kyc-03 | Relevance | 4 | 4 | Agree: Para 15(1)–(2) |
+
+## Result
+
+**Agreement: 10/10 within 1 point** (8/10 exact). The two differences go both ways (dpdp-03 judge higher, rbc-03 judge lower).
+
+Who scored: the owner delegated this check to Claude (`claude-opus-5-5`) on 2026-11-24. That makes this a second-model check, not a human one. It is not blind, since the judge's scores were in this sheet. And all three models are Claude, so they may share blind spots. Scores use the judge's own rubric, read from `Microsoft.Extensions.AI.Evaluation.Quality` 10.11.1. Groundedness was checked against the passage text in the database. Relevance was checked against the full paragraph in the corpus.
+
+Found while checking rbc-03 (not fixed here; needs a spec):
+
+- The chunker misses the section heading "I. Responsibilities of Direct Sales Agents (DSA) / Direct Marketing Agents (DMA) / Recovery Agents of the NBFC" (page 27). The section regex accepts only A–H, and the heading spans two lines. As a result, Paras 98–101 carry the heading "H.5 Engagement of recovery agents for recovery of microfinance loans".
+- The answer prompt sends no headings. With the right ones, rbc-03 has a clear answer: 8 a.m.–7 p.m. for most loans (Para 100), and 9 a.m.–6 p.m. for microfinance loans (Para 91).
 
 ## Answers and the judge's reasons
 
