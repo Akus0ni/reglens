@@ -20,6 +20,11 @@ missing=0
 # One pass per file: added lines that do not appear anywhere in main's copy of that file.
 while IFS= read -r file; do
   git cat-file -e "main:$file" 2>/dev/null || { echo "Missing on main: $file" >&2; missing=1; continue; }
+  # Identical content on both sides: nothing to check. A binary file has no lines to compare, so it must match exactly.
+  [ "$(git rev-parse "main:$file")" = "$(git rev-parse "$branch:$file")" ] && continue
+  if git diff --numstat "$base" "$branch" -- "$file" | grep -q $'^-	-	'; then
+    echo "Binary file differs on main: $file" >&2; missing=1; continue
+  fi
   git show "main:$file" > "$work/main"
   git diff "$base" "$branch" -- "$file" | grep '^+' | grep -v '^+++' | sed 's/^+//' | grep -v '^$' > "$work/added" || true
   if grep -vxFf "$work/main" "$work/added" > "$work/absent"; then
