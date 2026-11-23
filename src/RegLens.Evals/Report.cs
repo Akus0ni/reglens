@@ -76,12 +76,16 @@ public static class Report
             b.AppendLine(CultureInfo.InvariantCulture, $"| Tokens (answers) | {run.InputTokens:N0} in / {run.OutputTokens:N0} out |");
             // Runs before the metadata-key fix recorded no judge tokens; say so rather than print 0 (spec 0004 §9).
             var judgeRecorded = run.JudgeInputTokens > 0 || run.Questions.All(q => q.Judgements.Count == 0);
-            b.AppendLine(CultureInfo.InvariantCulture, judgeRecorded
-                ? $"| Tokens (judge) | {run.JudgeInputTokens:N0} in / {run.JudgeOutputTokens:N0} out |"
-                : "| Tokens (judge) | not recorded in this run |");
-            b.AppendLine(CultureInfo.InvariantCulture, judgeRecorded
-                ? $"| Cost at list price | ${Metrics.Format(run.CostUsd, 3)} |"
-                : $"| Cost at list price | ${Metrics.Format(run.CostUsd, 3)} for the answers; judge not recorded |");
+            if (judgeRecorded)
+            {
+                b.AppendLine(CultureInfo.InvariantCulture, $"| Tokens (judge) | {run.JudgeInputTokens:N0} in / {run.JudgeOutputTokens:N0} out |");
+                b.AppendLine(CultureInfo.InvariantCulture, $"| Cost at list price | ${Metrics.Format(run.CostUsd, 3)} |");
+            }
+            else
+            {
+                b.AppendLine("| Tokens (judge) | not recorded in this run |");
+                b.AppendLine(CultureInfo.InvariantCulture, $"| Cost at list price | ${Metrics.Format(run.CostUsd, 3)} for the answers; judge not recorded |");
+            }
             b.AppendLine(CultureInfo.InvariantCulture, $"| p50 latency, model-calling answers | {run.LatencyP50Ms / 1000:F1} s |").AppendLine();
         }
 

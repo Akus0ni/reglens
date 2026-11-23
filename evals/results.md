@@ -54,8 +54,8 @@ Configuration **hybrid-bm25**, `claude-sonnet-5-5` effort Medium, judge `claude-
 | Relevance, mean 1–5 (answered, judge) | 4.33 (n = 18) |
 | Judge failures | 0 |
 | Tokens (answers) | 109,449 in / 11,282 out |
-| Tokens (judge) | 0 in / 0 out |
-| Cost at list price | $0.332 |
+| Tokens (judge) | not recorded in this run |
+| Cost at list price | $0.332 for the answers; judge not recorded |
 | p50 latency, model-calling answers | 4.3 s |
 
 ## Injection probe
