@@ -1,7 +1,7 @@
 {
   "version": 1,
   "created": "2026-11-23",
-  "status": "draft: every row needs the owner's review (spec 0004, D42)",
+  "status": "reviewed by the owner: spec PR #11 merged 2026-11-23 (D42)",
   "matching": "An expected reference matches a chunk when para_ref equals it or starts with it followed by ',' (\"Para 13\" matches \"Para 13, part 1 of 2\", never \"Para 130\"), within the named document.",
   "questions": [
     {

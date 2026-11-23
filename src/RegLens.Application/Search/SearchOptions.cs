@@ -44,6 +44,6 @@ public sealed class SearchOptions
     /// <summary>Evals switch this (P1); the API keeps <see cref="SearchMode.Hybrid"/>.</summary>
     public SearchMode Mode { get; set; } = SearchMode.Hybrid;
 
-    /// <summary>The default stays <c>ts_rank_cd</c> until the owner picks from the eval results (P9).</summary>
-    public KeywordScoring KeywordScoring { get; set; } = KeywordScoring.TsRankCd;
+    /// <summary>BM25, chosen by the owner from the golden-set results (spec 0004, D49).</summary>
+    public KeywordScoring KeywordScoring { get; set; } = KeywordScoring.Bm25;
 }

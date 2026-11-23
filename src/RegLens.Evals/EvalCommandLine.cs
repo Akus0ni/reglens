@@ -18,7 +18,7 @@ public sealed record EvalCommandLine(string Name, EvalConfiguration Config, bool
             throw new ArgumentException($"Usage: <{string.Join("|", Commands)}> [--config name] [--floor x] [--confirm-spend]");
         }
 
-        var config = EvalConfiguration.Find("hybrid-tsrank");
+        var config = EvalConfiguration.Find("hybrid-bm25");
         var confirm = false;
         double? floor = null;
         for (var i = 1; i < args.Count; i++)

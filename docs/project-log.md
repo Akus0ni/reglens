@@ -2,6 +2,22 @@
 
 Newest first. What was done, why, and the problems hit.
 
+## 2026-11-24 — Spec 0004: golden set, evals and BM25 built
+
+- New corpus document ingested (124 chunks). The annex rule now accepts "Annex I – <title>" on one line; the other
+  four documents re-ingested hash-identical. Migration 003: BM25 statistics as materialized views, refreshed on
+  ingest. `src/RegLens.Evals` runs retrieval and answer evals, the floor, the injection probe and the report.
+- **Retrieval** (n = 20): hybrid-bm25 recall@5 0.85, recall@8 0.85, MRR@10 0.772 vs hybrid-tsrank 0.80 / 0.85 /
+  0.637; dense MRR 0.788. Spec 0002's A5 question went from outside the top 20 to rank 3. The owner chose BM25 as
+  the default (D49). Floor from the golden set: 0.60.
+- **Answers** (n = 30, Sonnet 5.5 medium): 10/10 unanswerable abstained, 2/20 answerable wrongly abstained (both
+  retrieval misses), 17/18 answered cited an expected paragraph, 0 citations dropped; judge groundedness 4.89 and
+  relevance 4.33 (n = 18), owner hand-check pending. Injection probe passed. About $0.55 spent.
+- Problems hit: PostgreSQL 17's safe `search_path` broke `ts_stat` inside a materialized view (schema-qualified);
+  guessed judge token keys recorded no judge cost for the run (fixed, reported as "not recorded"); the first
+  hand-check sheet sampled only KYC (now spread); a floor rounding bug; a timing-dependent Redis test.
+- Tests: 196.
+
 ## 2026-11-23 — Spec 0004 drafted: golden set, evals, BM25
 
 - PR #10 merged. Q7 answered yes: RBI (NBFCs – Responsible Business Conduct) Directions 2025 (id 12942, updated as on
