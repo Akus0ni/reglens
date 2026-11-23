@@ -2,6 +2,27 @@
 
 Newest first. What was done, why, and the problems hit.
 
+## 2026-11-24 — Spec 0005: contextual retrieval and heading fixes built
+
+- Chunker 2 fixes H1–H5 (section letters A–Z, wrapped headings, contents-page sections, 105A / 11A). A re-chunk
+  diff against the stored chunks shows exactly the 13 expected changes (513 → 512 chunks). Migration 004 adds
+  `chunk_contexts` and `documents.pipeline`; a pipeline change re-ingests without `--force`.
+- `claude-haiku-5-5` (effort low, cookbook prompt) wrote 512 contexts in 208 s for **$0.2746**: one cache write per
+  document, 98% of input tokens read from the prompt cache. A second ingest made no API call; a forced document
+  rebuilt from cached contexts for $0.
+- **Retrieval** (n = 20): the heading fixes alone changed nothing; with context, hybrid-bm25 recall@5 0.85 → 0.90,
+  recall@8 0.85 → 0.95, MRR@10 0.772 → 0.907. rbc-01 none → rank 1, dpdp-01 10 → 7, cf-05 none → 17 (still a miss).
+  Dense alone is now best (0.95 / 1.00 / 0.931). Floor 0.60 → 0.63.
+- **Answers** (n = 30, prompt v3 with headings): 10/10 unanswerable abstained, 0/20 answerable wrongly abstained
+  (was 2/20), 19/20 cited an expected paragraph; judge groundedness 4.90, relevance 4.45 (n = 20); $0.557. The rbc-03
+  hours question now separates Para 100 (8 a.m.–7 p.m.) from microfinance Para 91 (9 a.m.–6 p.m.).
+- Spend: about $0.84 of the $2 cap.
+- Problems hit: `IChatClient` usage puts cache writes only in `AdditionalCounts` (measured with a 2-call probe);
+  `GetCacheControl` is internal despite its XML docs; an SDK timeout looks like a cancellation; Python on Windows
+  rewrote `\n` escapes during an edit (caught by review); `scripts/delete-merged-branch.sh` breaks in Git Bash on
+  `branch:.dir/file` arguments (MSYS path conversion; fix with `MSYS_NO_PATHCONV=1`, not in this PR).
+- Tests: 235.
+
 ## 2026-11-24 — Spec 0005 drafted: contextual retrieval and heading fixes
 
 - PRs #13 and #14 merged. Owner decisions D50–D55: Haiku 5.5 writes chunk context; heading fixes and headings in the

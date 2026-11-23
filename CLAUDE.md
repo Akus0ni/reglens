@@ -6,7 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 RegLens is a .NET 10 API that answers questions about Indian NBFC regulation with verified citations and exposes
 itself as an MCP server. **Built so far: specs 0001 ingestion, 0002 hybrid retrieval** (`GET /search`), **0003
-answers** (`POST /ask`) **and 0004 evals** (golden set, BM25). Next: spec 0005, contextual retrieval. Plan, decisions
+answers** (`POST /ask`), **0004 evals** (golden set, BM25) **and 0005 contextual retrieval** (Haiku 5.5 chunk context,
+heading fixes). Next: spec 0006, MCP and production basics. Plan, decisions
 (D*n*) and open questions (Q*n*): `docs/plan.md`. Specs: `docs/specs/`. History: `docs/project-log.md`.
 
 ## Workflow — read first
@@ -37,6 +38,10 @@ dotnet test --project tests/RegLens.Domain.Tests -- --filter-method "*KeepsACorr
 dotnet run --project src/RegLens.Ingest           # migrate + ingest; run from the repo root (corpus/ is relative)
                                                   # the API never migrates: run this after pulling new migrations
 dotnet run --project src/RegLens.Ingest -- --force --document dpdp-rules-2025
+                                                  # Context:Enabled (default true) calls claude-haiku-5-5 per chunk: needs
+                                                  # ANTHROPIC_API_KEY, ~$0.25 for the corpus; contexts are cached in Postgres
+$env:Context__Enabled='false'; dotnet run --project src/RegLens.Ingest   # rebuild without context: free, no API call
+dotnet run scripts/chunk-diff.cs -- diff before.json   # re-chunk the PDFs and diff against an export of stored chunks
 
 dotnet user-secrets set "ConnectionStrings:RegLens" "<same as above>" --project src/RegLens.Api
 dotnet run --project src/RegLens.Api              # http://127.0.0.1:5180 (5080 is the owner's AgencyOS)
@@ -46,6 +51,7 @@ curl -X POST http://127.0.0.1:5180/ask -H "Content-Type: application/json" -d '{
 dotnet run --project src/RegLens.Evals -- retrieval --config hybrid-bm25     # free: recall@5/@8, MRR@10 (n = 20)
 dotnet run --project src/RegLens.Evals -- floor --config hybrid-bm25         # D48 floor from the latest retrieval run
 dotnet run --project src/RegLens.Evals -- answers --config hybrid-bm25 --confirm-spend  # ~$0.5, writes judge-check.md
+                                                  # (0004's filled sheet is judge-check-0004.md; hand checks: hand-checks.json)
 dotnet run --project src/RegLens.Evals -- probe --confirm-spend               # prompt-injection probe, ~$0.01
                                                   # configs: dense, keyword-tsrank, keyword-bm25, hybrid-tsrank, hybrid-bm25
 
@@ -79,8 +85,16 @@ PdfPig, OllamaSharp, Anthropic SDK, HybridCache + Redis, manifest) ← hosts `Re
   per numbered paragraph/rule with its heading trail; numbers and chapters must arrive in order, which keeps
   table-of-contents leftovers and stray numbered lines out → passages over 500 estimated tokens split at
   sub-clauses (`Para 5, part 3 of 14`) → `ChunkEmbedder` embeds through a bounded `Channel<T>` →
-  `PostgresChunkStore` replaces a changed document in one transaction. Unchanged documents are skipped.
-  Contextual retrieval (Haiku fills `chunks.context`) is planned for spec 0004.
+  `PostgresChunkStore` replaces a changed document in one transaction. A document is skipped only when both its file
+  hash and its pipeline (`documents.pipeline`, e.g. `chunker 2; context claude-haiku-5-5 v1`) match (spec 0005, P6).
+  `DocumentChunker.Version` and `ContextPrompt.Version` must be bumped whenever chunks or contexts would change.
+- **Contextual retrieval** (built, spec 0005): `ChunkContextualizer` gives each chunk a short context (Anthropic: "usually 50-100 tokens") from
+  `claude-haiku-5-5` (effort low) with Anthropic's cookbook prompt. The whole document is the first user block with a
+  5-minute cache breakpoint (`WithCacheControl`, only honoured by the `AsIChatClient` client); a document's first chunk
+  goes alone so the rest read the cache. Contexts are saved to `chunk_contexts` by input hash as they arrive (a re-run
+  pays only for missing ones); any failure leaves the stored document untouched. The context is embedded
+  (`search_document: ` + context + blank line + content) and keyword-indexed (`tsv`), but **never sent to the answer
+  model** (D52). `Context:Enabled=false` rebuilds without it.
 - **Search** (built, spec 0002, `GET /search`): `SearchRegulations` embeds `search_query: ` + question (falls back to
   keyword-only with `degraded` if Ollama fails) → `PostgresChunkSearch` runs one SQL statement: pgvector top-40 and
   full-text top-40 (OR of the question's lexemes; `tsv` covers context, heading, para_ref and content) fused with
@@ -90,8 +104,8 @@ PdfPig, OllamaSharp, Anthropic SDK, HybridCache + Redis, manifest) ← hosts `Re
   `Search:Mode` and `Search:KeywordScoring` switch configurations for evals.
 - **Ask** (built, spec 0003, `POST /ask`): `AnswerQuestion` looks up HybridCache (L1 memory, L2 Redis; key =
   prompt version + model + effort + index version + topK + sha256 of the normalised question) → `SearchRegulations`
-  → abstain without a Claude call if the best `similarity` < 0.55 and nothing is pinned → full passages to
-  `claude-sonnet-5-5` as escaped `<passage>` data with a JSON schema (`AnswerPrompt`) → `CitationVerifier` (Domain)
+  → abstain without a Claude call if the best `similarity` is below the floor and nothing is pinned → full passages
+  with their heading paths to `claude-sonnet-5-5` as escaped `<passage>` data with a JSON schema (`AnswerPrompt` v3) → `CitationVerifier` (Domain)
   drops citations whose chunk was not sent or whose quote is not in it (normalised substring, ≥ 20 chars) → answer,
   or abstention (`low-similarity`, `model-abstained`, `unverified`, `model-refused`). Refusals and degraded answers
   are not cached. `AnthropicFailureTranslation` maps SDK outages to 503; truncated or unparsable output is 502.
