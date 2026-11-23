@@ -44,13 +44,12 @@ blog posts.
 `delete_branch_on_merge`). Locally:
 
 ```bash
-gh pr view <n> --json state --jq .state      # must be MERGED
-git switch main && git pull --ff-only && git fetch --prune
-git diff --stat main <branch>                 # must be empty: the PR's content is on main
-git branch -D <branch>                        # -D, because squash merges make -d refuse
+scripts/delete-merged-branch.sh <branch> <pr-number>
 ```
 
-If the diff is not empty, stop and ask: the branch has work that did not reach `main`.
+It checks the PR is MERGED, updates `main`, then confirms every line the branch added is on `main` before
+`git branch -D` (squash merges make `-d` refuse, and a plain diff against a `main` that has moved on gives false
+alarms). If it reports lines not on `main`, stop and ask: the branch has work that did not reach `main`.
 
 Small fixes that change no behaviour (typos, docs, tooling) may skip the spec: branch `chore/…` or `fix/…`, one PR.
 Anything that changes what the API returns, what is stored, or what a model is asked is a feature and needs a spec.
