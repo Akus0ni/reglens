@@ -42,6 +42,10 @@ product features for compliance.
 | D24 | Schema via versioned SQL scripts applied in order and recorded in `schema_version` (spec 0001) | Owner | 2026-11-23 |
 | D25 | Build and test conventions mirror InvoiceGen: `global.json` + Microsoft.Testing.Platform, Central Package Management, `Directory.Build.props` (warnings as errors), xUnit v3, AwesomeAssertions, NSubstitute, Testcontainers (spec 0001) | Owner | 2026-11-23 |
 | D26 | Local infrastructure via `docker-compose.yml` (pgvector Postgres + standalone Aspire dashboard); Ollama runs natively (spec 0001) | Owner | 2026-11-23 |
+| D27 | `RegLens.Api` is created in spec 0002, bound to 127.0.0.1, without an API key; the key and rate limits come with spec 0005 | Owner | 2026-11-23 |
+| D28 | Citations in a query ("Rule 7", "para 6") are looked up exactly and shown first; `para_ref` and `heading` join the keyword index (spec 0002) | Owner | 2026-11-23 |
+| D29 | Every search hit carries its dense rank, keyword rank and fused score (spec 0002) | Owner | 2026-11-23 |
+| D30 | No document filter in spec 0002; a filter gets its own spec using pgvector iterative scans | Owner | 2026-11-23 |
 
 ## 3. Open questions
 
@@ -51,6 +55,7 @@ product features for compliance.
 | Q3 | How is the API key provisioned and checked (user-secrets, header name, rotation)? | Spec 0005 |
 | Q4 | Name and visibility of the Day 2 agent repo | Day 2 |
 | Q5 | Langfuse Cloud (Hobby) or self-hosted for agent traces | Day 2 tracing |
+| Q6 | Set `OLLAMA_KEEP_ALIVE` (e.g. `24h`) on the owner's machine so the embedding model stays loaded between searches? | Nothing (cold searches wait ~30 s) |
 
 ## 4. Specs (proposed order)
 
