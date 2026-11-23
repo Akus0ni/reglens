@@ -1,6 +1,6 @@
 # Spec 0003 — Answers with verified citations (`POST /ask`)
 
-> Status: **Draft** · Created: 2026-11-23 · Owner: @Akus0ni
+> Status: **Approved (PR #9, 2026-11-23) · Implemented in `feat/0003-answers`** · Created: 2026-11-23 · Owner: @Akus0ni
 > Depends on: spec 0002 (hybrid search) · Blocked by open questions: none (Q3 stays open for spec 0005)
 > Sprint phase: D1·4
 
@@ -154,7 +154,7 @@ public sealed record AnswerDraft(string Answer, bool Abstained, string MissingIn
 public sealed record DraftCitation(long ChunkId, string Quote);
 ```
 
-System prompt (fixed in code; `v1` in the cache key):
+System prompt (fixed in code; `v2` in the cache key since the build, §9):
 
 ```text
 You answer questions about Indian NBFC regulation using only the passages in the user message.
@@ -163,6 +163,7 @@ Answer only from the passages. If they do not answer the question, set abstained
 what information is missing. If they answer only part of it, answer that part and describe the rest in missingInfo.
 For every statement you make, cite the passage id and copy an exact quote of at least one full sentence or clause
 from that passage. Do not paraphrase inside a quote. Do not cite passages you did not use.
+Do not mention passage ids in the answer text; the citations carry them.
 Keep the answer short and plain; do not give legal advice.
 ```
 
@@ -234,7 +235,52 @@ cache hit; citations kept and dropped (with reasons). Floor value used and how m
 |---|----------|--------|
 | — | Confirm or change P1–P13 by approving or commenting on this PR | Code PR for 0003 |
 
-## 9. Sources (checked 2026-11-23)
+## 9. Changes made while building
+
+| Where | Change | Why |
+|-------|--------|-----|
+| §5 prompt, P8 | Prompt **v2** adds "Do not mention passage ids in the answer text; the citations carry them." Cache keys now start `answer:v2:` | A live answer said "Passage 184 only says…"; ids are internal |
+| R3.7 | The schema is sent with `ChatResponseFormat.ForJsonSchema` and parsed by our code, not with `GetResponseAsync<T>` | That extension lives in `Microsoft.Extensions.AI`, not the abstractions; parsing ourselves keeps Application on abstractions and lets the finish reason be checked before parsing (refusal / `max_tokens`) |
+| R3.9, P12 | Output that does not parse against the schema is also a 502 (as truncation is). `AnthropicFailureTranslation` (Infrastructure) maps 408, 429, 5xx, I/O errors and the SDK timeout to 503; other 4xx (400, 401, 403, 404) are configuration errors and stay a 500 | Application never sees SDK exception types; an expired key is not an outage |
+| R3.6 | If search returns no hits at all (degraded and no keyword match), `/ask` abstains with `low-similarity` without calling Claude | Nothing to answer from |
+| R3.4 | A verified citation's `quote` is returned in normalised form | It is the text that was matched |
+| R3.12, A8 | Redis connection string `127.0.0.1:6379,abortConnect=false,connectTimeout=1000,syncTimeout=500,asyncTimeout=500` | With StackExchange.Redis defaults, every `/ask` waited ~5 s per cache read and write while Redis was down (measured 5.2–9.1 s); now ~0.9 s |
+| A3 | "What must a Key Fact Statement contain?" **abstains, correctly**: Credit Facilities Para 9 says a KFS is provided "as per instructions contained in" the RBI (NBFCs – Responsible Business Conduct) Directions, 2025, which is not in the corpus, and Claude named that document as the missing information. Substitute question "When must an NBFC give a borrower the Key Fact Statement?" gives a partial answer with 2 verified citations | The spec's question assumed the KFS contents were in our corpus; they are not (see Q7 in `docs/plan.md`) |
+| — | A request without `Content-Type: application/json` gets 415 from the framework | ASP.NET Core minimal API default |
+
+## 10. Results (2026-11-23, live API, 389 chunks, `claude-sonnet-5-5`, effort medium, prompt v2)
+
+| # | Result |
+|---|--------|
+| A1 | 0 warnings, 0 errors |
+| A2 | **163 tests pass** (55 new): verifier incl. forged id and forged quote, normalisation, prompt escaping and schema, use case (floor, pin, model abstention, unverified, refusal not cached, truncation, bad JSON, cache hit, re-ingest, degraded not cached, 10 concurrent → 1 call, cancellation), similarity SQL, passage reader, index version, HybridCache over Redis and with Redis unreachable, `/ask` JSON, 400s, 502, 503 |
+| A3 | 4 of 5 answered with verified citations (breach → DPDP Rule 7 ×3; cooling-off → Credit Facilities Para 11 ×4; KYC updation → KYC Para 42 ×3; V-CIP → KYC Para 5 and 27 ×7). KFS contents abstained correctly (§9); the substitute KFS question answered with 2 citations. **0 citations dropped** |
+| A4 | GST and income tax: `model-abstained`; cricket: `low-similarity` with no Claude call (101 ms) |
+| A5 | Repeats: `cached: true`, `usage: null`, **29–44 ms** |
+| A6 | 10 concurrent identical new questions: all 200, **1 Claude call**, 9 `cached: true` |
+| A7 | After restarting the API (and, separately, Redis and the API together): `cached: true` from Redis, 16–243 ms |
+| A8 | Redis stopped: HTTP 200, `cached: false`, ~0.9 s per new question after the change in §9 (5–9 s before it). Observation: the first lookup after Redis came back missed once and re-asked Claude; no wrong answer |
+| A9 | Ollama unreachable: answered, `degraded: "vector search unavailable"`, `cached: false` (asked twice, Claude called twice). **30 s** per request, from the Ollama retries before the keyword fallback (follow-up; spec 0002 measured 12.3 s for `/search`). A question already cached is still served while Ollama is down, because the cache is read before search |
+| A10 | Empty, 501 characters, `topK` 0 / 21 / `"abc"`, empty body, non-JSON body → HTTP 400 `application/problem+json` |
+
+Measurements (n = 9 questions, 8 Claude calls, list prices $2 / $10 per MTok):
+
+| Question | Result | Input tok | Output tok | Cost | Latency |
+|----------|--------|-----------|------------|------|---------|
+| Breach reporting to the Board | answered, 3 cites | 4,564 | 357 | $0.0127 | 4.5 s |
+| Cooling-off period | answered, 4 cites | 5,267 | 392 | $0.0145 | 3.4 s |
+| KFS contents | abstained (model) | 4,394 | 287 | $0.0117 | 3.2 s |
+| When to give the KFS (substitute) | answered, 2 cites | 4,789 | 341 | $0.0130 | 3.3 s |
+| KYC updation, high risk | answered, 3 cites | 5,504 | 342 | $0.0144 | 3.2 s |
+| V-CIP | answered, 7 cites | 5,693 | 736 | $0.0187 | 5.3 s |
+| GST on gold | abstained (model) | 2,938 | 146 | $0.0073 | 2.6 s |
+| Income tax return | abstained (model) | 3,835 | 234 | $0.0100 | 3.8 s |
+| Cricket world cup | abstained (floor) | — | — | $0 | 0.1 s |
+| **Total / mean per Claude call** | | 36,984 | 2,835 | **$0.102 / $0.0128** | **p50 3.3 s**, max 5.3 s |
+
+The floor (0.55) stopped 1 of 9 questions. Output tokens include thinking. Cache hit: 29–44 ms.
+
+## 11. Sources (checked 2026-11-23)
 
 - Claude structured outputs: `output_config.format`; incompatible with Citations (400); refusal and `max_tokens`
   may break the schema; limits of 24 optional and 16 union-typed parameters; enum casing; grammar cached 24 h —

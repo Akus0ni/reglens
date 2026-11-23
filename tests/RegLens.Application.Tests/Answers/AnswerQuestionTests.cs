@@ -243,7 +243,7 @@ public sealed class AnswerQuestionTests : IDisposable
     {
         var key = Answers().CacheKey(" Rule  7 ", 8, "index-a");
 
-        key.Should().StartWith("answer:v1:claude-sonnet-5-5:Medium:index-a:8:")
+        key.Should().StartWith("answer:v2:claude-sonnet-5-5:Medium:index-a:8:")
             .And.Be(Answers().CacheKey("rule 7", 8, "index-a"))
             .And.NotBe(Answers().CacheKey("rule 7", 5, "index-a"));
         key.Should().NotContain("rule");

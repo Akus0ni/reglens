@@ -18,7 +18,7 @@ public sealed record DraftCitation(long ChunkId, string Quote);
 public static class AnswerPrompt
 {
     /// <summary>Part of the cache key; bump it whenever the prompt or the schema changes (P8).</summary>
-    public const string Version = "v1";
+    public const string Version = "v2";
 
     public const string System = """
         You answer questions about Indian NBFC regulation using only the passages in the user message.
@@ -27,6 +27,7 @@ public static class AnswerPrompt
         what information is missing. If they answer only part of it, answer that part and describe the rest in missingInfo.
         For every statement you make, cite the passage id and copy an exact quote of at least one full sentence or clause
         from that passage. Do not paraphrase inside a quote. Do not cite passages you did not use.
+        Do not mention passage ids in the answer text; the citations carry them.
         Keep the answer short and plain; do not give legal advice.
         """;
 

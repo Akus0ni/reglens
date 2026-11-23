@@ -78,7 +78,7 @@ public sealed partial class AnswerQuestion(
     }
 
     /// <summary>
-    /// <c>answer:v1:{model}:{effort}:{indexVersion}:{topK}:{sha256(normalised question)}</c> (P8). Hashing keeps the
+    /// <c>answer:{promptVersion}:{model}:{effort}:{indexVersion}:{topK}:{sha256(normalised question)}</c> (P8). Hashing keeps the
     /// key short and the question text out of Redis key names.
     /// </summary>
     public string CacheKey(string question, int topK, string version)
