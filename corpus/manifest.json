@@ -1,0 +1,80 @@
+{
+  "corpus": "RegLens starter corpus",
+  "scope": "Indian regulation applicable to NBFCs: KYC, digital lending, personal data protection",
+  "checked": "2026-11-23",
+  "not_included": [
+    "Digital Personal Data Protection Act, 2023 (optional, per the sprint plan)"
+  ],
+  "documents": [
+    {
+      "id": "rbi-nbfc-kyc-2025",
+      "file": "rbi-nbfc-kyc-directions-2025.pdf",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies – Know Your Customer) Directions, 2025",
+      "issuer": "Reserve Bank of India",
+      "reference": "RBI/DOR/2025-26/361; DOR.AML.REC.No.280/14.01.003/2025-26",
+      "issued": "2025-11-28",
+      "version": "Updated as on 2025-12-29",
+      "source_page": "https://www.rbi.org.in/Scripts/BS_ViewMasDirections.aspx?id=12943",
+      "source_url": "https://rbidocs.rbi.org.in/rdocs/notification/PDFs/361MD1E2F8EA063454AD5AFA1D02A1BA5ACA7.PDF",
+      "downloaded": "2026-11-23",
+      "bytes": 603902,
+      "pages": 96,
+      "sha256": "c7c2dbdaa1917169a7c5e7b369058d6502b171b81d6a69a4b061d9391fa7cc77",
+      "language": "English (cover lines in Hindi)",
+      "notes": "Replaces the Master Direction – KYC Direction, 2016 for NBFCs (repealed 2025-11-28, circular DOR.RRC.REC.302/33-01-010/2025-26)."
+    },
+    {
+      "id": "rbi-nbfc-credit-facilities-2025",
+      "file": "rbi-nbfc-credit-facilities-directions-2025.pdf",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies – Credit Facilities) Directions, 2025",
+      "issuer": "Reserve Bank of India",
+      "reference": "RBI/DOR/2025-26/347; DOR.CRE.REC.No.266/07-01-008/2025-26",
+      "issued": "2025-11-28",
+      "version": "Updated as on 2026-07-15",
+      "source_page": "https://www.rbi.org.in/Scripts/BS_ViewMasDirections.aspx?id=12957",
+      "source_url": "https://rbidocs.rbi.org.in/rdocs/notification/PDFs/347MD5CC21D3597C04354B67A42A1A4CB439C.PDF",
+      "downloaded": "2026-11-23",
+      "bytes": 555191,
+      "pages": 54,
+      "sha256": "0b5f49f8de6cc832e17de1298fd705764c907b819d9e2db97b4af3b909b5ccb7",
+      "language": "English (cover lines in Hindi)",
+      "notes": "Chapter III is Digital Lending; it carries the rules of the repealed RBI (Digital Lending) Directions, 2025 for NBFCs."
+    },
+    {
+      "id": "dpdp-rules-2025",
+      "file": "dpdp-rules-2025.pdf",
+      "title": "Digital Personal Data Protection Rules, 2025",
+      "issuer": "Ministry of Electronics and Information Technology (Gazette of India, Extraordinary)",
+      "reference": "G.S.R. 846(E)",
+      "issued": "2025-11-13",
+      "version": "As notified 2025-11-13; corrected by G.S.R. 892(E)",
+      "source_page": "https://www.meity.gov.in/documents/act-and-policies/digital-personal-data-protection-rules-2025-gDOxUjMtQWa",
+      "source_url": "https://www.meity.gov.in/static/uploads/2025/11/53450e6e5dc0bfa85ebd78686cadad39.pdf",
+      "downloaded": "2026-11-23",
+      "bytes": 2492944,
+      "pages": 41,
+      "sha256": "eabc7d05e013144615d78ddc0e8b9c9aac1920e814f4fad38ce6560951f5aa08",
+      "language": "Bilingual: pages 1-23 Hindi, pages 24-41 English",
+      "ingest_pages": "24-41",
+      "notes": "Ingest the English pages only. Corrections are in dpdp-rules-2025-corrigendum."
+    },
+    {
+      "id": "dpdp-rules-2025-corrigendum",
+      "file": "dpdp-rules-2025-corrigendum.pdf",
+      "title": "Corrigenda to the Digital Personal Data Protection Rules, 2025",
+      "issuer": "Ministry of Electronics and Information Technology (Gazette of India, Extraordinary)",
+      "reference": "G.S.R. 892(E)",
+      "issued": "2025-12-10",
+      "version": "As published",
+      "source_page": "https://www.meity.gov.in/documents/act-and-policies/digital-personal-data-protection-rules-2025-gDOxUjMtQWa",
+      "source_url": "https://www.meity.gov.in/static/uploads/2025/12/3c7ebbae0e5456f493f486e6845df86b.pdf",
+      "downloaded": "2026-11-23",
+      "bytes": 408279,
+      "pages": 1,
+      "sha256": "8f8d9526b511801889f8ae022b6d7c5db449283e90fe32792e5896314b32f994",
+      "language": "English (masthead bilingual)",
+      "corrects": "dpdp-rules-2025",
+      "notes": "Eight wording fixes on Gazette pages 24-38 of G.S.R. 846(E); no material change."
+    }
+  ]
+}
