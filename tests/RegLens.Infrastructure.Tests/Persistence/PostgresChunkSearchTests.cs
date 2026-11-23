@@ -133,7 +133,7 @@ public class PostgresChunkSearchTests(PostgresFixture postgres)
         var embedded = Chunks
             .Select((c, i) => new EmbeddedChunk(new Chunk("doc", c.ParaRef, c.Heading, 1, 1, c.Content), Axis(i)))
             .ToList();
-        await new PostgresChunkStore(dataSource).ReplaceDocumentAsync(document, embedded, Ct);
+        await new PostgresChunkStore(dataSource).ReplaceDocumentAsync(document, "test", embedded, Ct);
         return new PostgresChunkSearch(dataSource);
     }
 

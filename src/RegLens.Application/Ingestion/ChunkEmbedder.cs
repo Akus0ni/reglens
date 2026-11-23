@@ -8,6 +8,7 @@ namespace RegLens.Application.Ingestion;
 /// <summary>
 /// Embeds chunks through a bounded channel with a fixed number of consumers (spec 0001, R1.18–R1.19).
 /// The channel is the backpressure: when Ollama is slow, the producer waits instead of queueing everything in memory.
+/// A chunk's context, when it has one, is embedded with it (spec 0005, R5.11, P7).
 /// </summary>
 public sealed class ChunkEmbedder(
     IEmbeddingGenerator<string, Embedding<float>> generator,
@@ -15,7 +16,14 @@ public sealed class ChunkEmbedder(
 {
     private readonly EmbeddingOptions _options = options.Value;
 
-    public async Task<IReadOnlyList<EmbeddedChunk>> EmbedAsync(IReadOnlyList<Chunk> chunks, CancellationToken cancellationToken)
+    /// <summary>Embeds chunks without context.</summary>
+    public Task<IReadOnlyList<EmbeddedChunk>> EmbedAsync(IReadOnlyList<Chunk> chunks, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(chunks);
+        return EmbedAsync(chunks.Select(chunk => new ContextualChunk(chunk, null)).ToList(), cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<EmbeddedChunk>> EmbedAsync(IReadOnlyList<ContextualChunk> chunks, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(chunks);
 
@@ -54,7 +62,7 @@ public sealed class ChunkEmbedder(
 
     private async Task ConsumeAsync(
         ChannelReader<int> reader,
-        IReadOnlyList<Chunk> chunks,
+        IReadOnlyList<ContextualChunk> chunks,
         EmbeddedChunk[] results,
         CancellationTokenSource stop)
     {
@@ -72,10 +80,20 @@ public sealed class ChunkEmbedder(
         }
     }
 
-    private async Task<EmbeddedChunk> EmbedOneAsync(Chunk chunk, CancellationToken cancellationToken)
+    /// <summary>The document prefix, then the context and a blank line when there is one, then the chunk (P7, cookbook order).</summary>
+    public string EmbeddingInput(ContextualChunk chunk)
     {
+        ArgumentNullException.ThrowIfNull(chunk);
+        return chunk.Context is null
+            ? _options.DocumentPrefix + chunk.Chunk.Content
+            : _options.DocumentPrefix + chunk.Context + "\n\n" + chunk.Chunk.Content;
+    }
+
+    private async Task<EmbeddedChunk> EmbedOneAsync(ContextualChunk contextual, CancellationToken cancellationToken)
+    {
+        var chunk = contextual.Chunk;
         var vector = await generator
-            .GenerateVectorAsync(_options.DocumentPrefix + chunk.Content, cancellationToken: cancellationToken)
+            .GenerateVectorAsync(EmbeddingInput(contextual), cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
         if (vector.Length != _options.Dimensions)
@@ -85,6 +103,6 @@ public sealed class ChunkEmbedder(
                 "Check the embedding model.");
         }
 
-        return new EmbeddedChunk(chunk, vector);
+        return new EmbeddedChunk(chunk, vector, contextual.Context);
     }
 }

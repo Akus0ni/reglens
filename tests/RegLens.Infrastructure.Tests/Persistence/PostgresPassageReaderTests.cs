@@ -57,7 +57,7 @@ public class PostgresPassageReaderTests(PostgresFixture postgres)
         "https://example.test", new string(hash, 64), 100, 1, new PageRange(1, 1), DocumentStructure.RbiDirections);
 
     private static Task Store(NpgsqlDataSource dataSource, SourceDocument document, params (string ParaRef, string Content)[] chunks) =>
-        new PostgresChunkStore(dataSource).ReplaceDocumentAsync(document,
+        new PostgresChunkStore(dataSource).ReplaceDocumentAsync(document, "test",
             [.. chunks.Select((c, i) => new EmbeddedChunk(new Chunk(document.Id, c.ParaRef, "Heading", 1, 1, c.Content), Axis(i)))],
             Ct);
 

@@ -83,7 +83,7 @@ public class Bm25SearchTests(PostgresFixture postgres)
         var document = new SourceDocument("doc", "doc.pdf", "Test Directions", "RBI/TEST", "v1", "https://example.test",
             new string('a', 64), 100, 1, new PageRange(1, 1), DocumentStructure.RbiDirections);
         var store = new PostgresChunkStore(dataSource);
-        await store.ReplaceDocumentAsync(document,
+        await store.ReplaceDocumentAsync(document, "test",
             [.. Chunks.Select((c, i) => new EmbeddedChunk(new Chunk("doc", c.ParaRef, "Alpha", 1, 1, c.Content), Axis(i)))], Ct);
         await store.RefreshSearchStatisticsAsync(Ct);
         return dataSource;

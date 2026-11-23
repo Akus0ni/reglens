@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.AI;
+using static RegLens.Application.PromptText;
 
 namespace RegLens.Application.Answers;
 
@@ -79,13 +80,4 @@ public static class AnswerPrompt
             return null;
         }
     }
-
-    // Only what could end a tag (P4). WebUtility.HtmlEncode would also rewrite § and other Latin-1 characters as
-    // &#167;, which the model would then copy into its quotes.
-    private static string Escape(string text) => text
-        .Replace("&", "&amp;", StringComparison.Ordinal)
-        .Replace("<", "&lt;", StringComparison.Ordinal)
-        .Replace(">", "&gt;", StringComparison.Ordinal);
-
-    private static string EscapeAttribute(string text) => Escape(text).Replace("\"", "&quot;", StringComparison.Ordinal);
 }
