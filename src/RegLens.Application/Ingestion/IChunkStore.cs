@@ -18,4 +18,7 @@ public interface IChunkStore
 
     /// <summary>Replaces the document and all its chunks in one transaction.</summary>
     Task ReplaceDocumentAsync(SourceDocument document, IReadOnlyList<EmbeddedChunk> chunks, CancellationToken cancellationToken);
+
+    /// <summary>Recomputes the corpus-wide word statistics keyword scoring reads (spec 0004, R4.4).</summary>
+    Task RefreshSearchStatisticsAsync(CancellationToken cancellationToken);
 }

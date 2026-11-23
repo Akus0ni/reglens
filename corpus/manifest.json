@@ -1,6 +1,6 @@
 {
   "corpus": "RegLens starter corpus",
-  "scope": "Indian regulation applicable to NBFCs: KYC, digital lending, personal data protection",
+  "scope": "Indian regulation applicable to NBFCs: KYC, credit facilities and digital lending, responsible business conduct (KFS, penal charges, recovery), personal data protection",
   "checked": "2026-11-23",
   "not_included": [
     "Digital Personal Data Protection Act, 2023 (optional, per the sprint plan)"
@@ -41,6 +41,24 @@
       "language": "English (cover lines in Hindi)",
       "structure": "rbi-directions",
       "notes": "Chapter III is Digital Lending; it carries the rules of the repealed RBI (Digital Lending) Directions, 2025 for NBFCs."
+    },
+    {
+      "id": "rbi-nbfc-responsible-business-conduct-2025",
+      "file": "rbi-nbfc-responsible-business-conduct-directions-2025.pdf",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies – Responsible Business Conduct) Directions, 2025",
+      "issuer": "Reserve Bank of India",
+      "reference": "RBI/DOR/2025-26/362; DOR.MCS.REC.No.281/01-01-039/2025-26",
+      "issued": "2025-11-28",
+      "version": "Updated as on 2026-07-01",
+      "source_page": "https://www.rbi.org.in/Scripts/BS_ViewMasDirections.aspx?id=12942",
+      "source_url": "https://rbidocs.rbi.org.in/rdocs/notification/PDFs/362MD26CA543937BA439A97E1BCFC08CF5808.PDF",
+      "downloaded": "2026-11-23",
+      "bytes": 495859,
+      "pages": 36,
+      "sha256": "783413a9bbc8e0090b88ed0d2bfe039d2c2b2e54c23851b8bdbd819fe4c6f111",
+      "language": "English (cover lines in Hindi)",
+      "structure": "rbi-directions",
+      "notes": "Added by spec 0004 (D41). Credit Facilities Para 9 points here for the Key Facts Statement; Annex I (pages 34-35) is the KFS format. The KFS illustration tables (pages 12-13) extract as loose numbers. Annex II is marked deleted. Paragraph 105A folds into Para 105 (the chunker numbers paragraphs with digits only)."
     },
     {
       "id": "dpdp-rules-2025",

@@ -14,13 +14,15 @@ public sealed class PostgresChunkSearch(NpgsqlDataSource dataSource) : IChunkSea
 {
     public const int RrfK = 60;
     public const int ExcerptLength = 300;
+    public const double Bm25K1 = 1.2;
+    public const double Bm25B = 0.75;
     private const int MaxCitationMatches = 100;
 
     // The keyword query is the OR of the question's own lexemes (spec 0002, P1). 'simple' keeps the already
     // stemmed lexemes as they are; a question of only stop words gives NULL and the keyword side is skipped.
     private const string KeywordQuery = """
         q AS (
-            SELECT to_tsquery('simple', string_agg(quote_literal(lexeme), ' | ')) AS query
+            SELECT to_tsquery('simple', string_agg(quote_literal(lexeme), ' | ')) AS query, array_agg(lexeme) AS lexemes
             FROM unnest(to_tsvector('english', @text))
         )
         """;
@@ -46,6 +48,31 @@ public sealed class PostgresChunkSearch(NpgsqlDataSource dataSource) : IChunkSea
         )
         """;
 
+    // BM25 (spec 0004, R4.5): Σ idf · tf · (k1 + 1) / (tf + k1 · (1 − b + b · len / avg_len)) over the query's
+    // lexemes in the chunk, with Lucene's idf = ln(1 + (N − n + 0.5) / (n + 0.5)). tf is the lexeme's position
+    // count in tsv; the statistics are materialized views that ingestion refreshes (migration 003).
+    private const string Bm25KeywordCandidates = """
+        lex AS (
+            SELECT id, row_number() OVER (ORDER BY score DESC, id) AS r
+            FROM (SELECT t.id,
+                         sum(ln(1 + (cs.n - ls.ndoc + 0.5) / (ls.ndoc + 0.5))
+                             * (t.tf * (@k1 + 1)) / (t.tf + @k1 * (1 - @b + @b * cl.len / cs.avg_len)))::float8 AS score
+                  FROM (SELECT c.id, u.lexeme, coalesce(array_length(u.positions, 1), 1) AS tf
+                        FROM chunks c CROSS JOIN q, unnest(c.tsv) u
+                        WHERE q.query IS NOT NULL AND c.tsv @@ q.query AND u.lexeme = ANY(q.lexemes)) t
+                  JOIN lexeme_stats ls ON ls.lexeme = t.lexeme
+                  JOIN chunk_lengths cl ON cl.id = t.id
+                  CROSS JOIN corpus_stats cs
+                  GROUP BY t.id
+                  ORDER BY score DESC, t.id
+                  LIMIT @candidates) k
+        )
+        """;
+
+    private const string NoKeywordCandidates = """
+        lex AS (SELECT NULL::bigint AS id, NULL::bigint AS r WHERE false)
+        """;
+
     private const string Fused = """
         fused AS (
             SELECT id, dense.r AS d_rank, lex.r AS k_rank, dense.similarity,
@@ -64,7 +91,7 @@ public sealed class PostgresChunkSearch(NpgsqlDataSource dataSource) : IChunkSea
         ArgumentNullException.ThrowIfNull(query);
 
         var sql = $"""
-            WITH {KeywordQuery}, {Dense(query)}, {KeywordCandidates}, {Fused}
+            WITH {KeywordQuery}, {Dense(query)}, {Keyword(query)}, {Fused}
             SELECT {HitColumns}
             FROM fused f JOIN chunks c ON c.id = f.id JOIN documents d ON d.id = c.document_id
             ORDER BY f.score DESC, c.id
@@ -87,7 +114,7 @@ public sealed class PostgresChunkSearch(NpgsqlDataSource dataSource) : IChunkSea
 
         // Matching rules mirror Citation.Matches (spec 0002, R2.3): exact, "<ref>, …", and "…, Item N" for items.
         var sql = $"""
-            WITH {KeywordQuery}, {Dense(query)}, {KeywordCandidates}, {Fused}
+            WITH {KeywordQuery}, {Dense(query)}, {Keyword(query)}, {Fused}
             SELECT {HitColumns}
             FROM chunks c JOIN documents d ON d.id = c.document_id LEFT JOIN fused f ON f.id = c.id
             WHERE c.para_ref = ANY(@exact) OR c.para_ref LIKE ANY(@prefixes) OR c.para_ref LIKE ANY(@suffixes)
@@ -106,6 +133,13 @@ public sealed class PostgresChunkSearch(NpgsqlDataSource dataSource) : IChunkSea
 
     private static string Dense(SearchQuery query) => query.HasVector ? DenseCandidates : NoDenseCandidates;
 
+    private static string Keyword(SearchQuery query) => (query.UseKeywords, query.Scoring) switch
+    {
+        (false, _) => NoKeywordCandidates,
+        (true, KeywordScoring.Bm25) => Bm25KeywordCandidates,
+        _ => KeywordCandidates,
+    };
+
     private NpgsqlCommand Command(string sql, SearchQuery query)
     {
         var command = dataSource.CreateCommand(sql);
@@ -113,6 +147,8 @@ public sealed class PostgresChunkSearch(NpgsqlDataSource dataSource) : IChunkSea
         command.Parameters.AddWithValue("candidates", query.CandidatesPerSide);
         command.Parameters.AddWithValue("rrf_k", RrfK);
         command.Parameters.AddWithValue("excerpt", ExcerptLength);
+        command.Parameters.AddWithValue("k1", Bm25K1);
+        command.Parameters.AddWithValue("b", Bm25B);
         if (query.HasVector)
         {
             command.Parameters.AddWithValue("vector", new Vector(query.Vector));

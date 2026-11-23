@@ -77,6 +77,26 @@ public class RbiDirectionsChunkingTests
     }
 
     [Fact]
+    public void RecognisesAnAnnexWithItsTitleOnTheSameLine()
+    {
+        var passages = Segment("""
+            1. The NBFC shall provide a KFS as per the format in Annex I.
+            Annex I – Format of Key Facts Statement (KFS)
+            Part 1 (Interest rate and fees / charges)
+            1 Loan proposal/ account No. Type of Loan
+            2 Sanctioned Loan amount (in Rupees)
+            3 Disbursal schedule (i) Disbursement in stages or 100% upfront.
+            4 Loan term (year/months/days)
+            Annex II – Lending against collateral of Gold Jewellery [Deleted]
+            """);
+
+        // Annex II has only its title, so it folds into its heading and yields no chunk (spec 0001 §9).
+        passages.Select(p => p.ParaRef).Should().Equal("Para 1", "Annex I");
+        passages[1].Content.Should().Contain("Sanctioned Loan amount").And.NotContain("Gold Jewellery");
+        passages[0].Content.Should().NotContain("Loan proposal");
+    }
+
+    [Fact]
     public void RestartsNumberingInsideAnAnnex()
     {
         var passages = Segment("""

@@ -1,0 +1,348 @@
+{
+  "info": {
+    "kind": "retrieval",
+    "config": "dense",
+    "startedUtc": "2026-11-23T18:24:37.7279634+00:00",
+    "commit": "063f759-dirty",
+    "embeddingModel": "nomic-embed-text",
+    "goldenSetVersion": "1"
+  },
+  "n": 20,
+  "recallAt5": 0.8,
+  "recallAt8": 0.85,
+  "mrrAt10": 0.7876984126984127,
+  "questions": [
+    {
+      "id": "kyc-01",
+      "kind": "direct",
+      "firstHitRank": 1,
+      "bestSimilarityTop8": 0.7954919934272823,
+      "pinned": false,
+      "top5": [
+        "rbi-nbfc-kyc-2025 Para 45",
+        "rbi-nbfc-kyc-2025 Para 28",
+        "rbi-nbfc-kyc-2025 Para 17, part 1 of 2",
+        "rbi-nbfc-kyc-2025 Para 38",
+        "rbi-nbfc-kyc-2025 Para 37"
+      ]
+    },
+    {
+      "id": "kyc-02",
+      "kind": "direct",
+      "firstHitRank": 1,
+      "bestSimilarityTop8": 0.8725076977940976,
+      "pinned": false,
+      "top5": [
+        "rbi-nbfc-kyc-2025 Para 41",
+        "rbi-nbfc-kyc-2025 Para 20",
+        "rbi-nbfc-responsible-business-conduct-2025 Para 56",
+        "rbi-nbfc-kyc-2025 Para 39",
+        "rbi-nbfc-kyc-2025 Para 42, part 1 of 5"
+      ]
+    },
+    {
+      "id": "kyc-03",
+      "kind": "direct",
+      "firstHitRank": 1,
+      "bestSimilarityTop8": 0.7245438746700898,
+      "pinned": false,
+      "top5": [
+        "rbi-nbfc-kyc-2025 Para 15",
+        "rbi-nbfc-kyc-2025 Para 63, part 2 of 3",
+        "rbi-nbfc-kyc-2025 Para 63, part 1 of 3",
+        "rbi-nbfc-kyc-2025 Para 24, part 2 of 4",
+        "rbi-nbfc-kyc-2025 Para 6"
+      ]
+    },
+    {
+      "id": "kyc-04",
+      "kind": "direct",
+      "firstHitRank": 1,
+      "bestSimilarityTop8": 0.8416862768507514,
+      "pinned": false,
+      "top5": [
+        "rbi-nbfc-kyc-2025 Para 47",
+        "rbi-nbfc-kyc-2025 Para 48",
+        "rbi-nbfc-credit-facilities-2025 Para 14",
+        "rbi-nbfc-responsible-business-conduct-2025 Para 35",
+        "rbi-nbfc-kyc-2025 Para 21"
+      ]
+    },
+    {
+      "id": "kyc-05",
+      "kind": "direct",
+      "firstHitRank": 1,
+      "bestSimilarityTop8": 0.8796454049847829,
+      "pinned": false,
+      "top5": [
+        "rbi-nbfc-kyc-2025 Para 24, part 1 of 4",
+        "rbi-nbfc-kyc-2025 Para 24, part 4 of 4",
+        "rbi-nbfc-kyc-2025 Para 24, part 3 of 4",
+        "rbi-nbfc-kyc-2025 Para 42, part 2 of 5",
+        "rbi-nbfc-kyc-2025 Para 23, part 3 of 4"
+      ]
+    },
+    {
+      "id": "kyc-06",
+      "kind": "paraphrase",
+      "firstHitRank": 1,
+      "bestSimilarityTop8": 0.7224318931313198,
+      "pinned": false,
+      "top5": [
+        "rbi-nbfc-kyc-2025 Para 42, part 1 of 5",
+        "rbi-nbfc-kyc-2025 Para 42, part 3 of 5",
+        "rbi-nbfc-kyc-2025 Para 42, part 2 of 5",
+        "rbi-nbfc-kyc-2025 Para 63, part 3 of 3",
+        "rbi-nbfc-kyc-2025 Para 42, part 5 of 5"
+      ]
+    },
+    {
+      "id": "cf-01",
+      "kind": "paraphrase",
+      "firstHitRank": 9,
+      "bestSimilarityTop8": 0.6575520634651605,
+      "pinned": false,
+      "top5": [
+        "rbi-nbfc-credit-facilities-2025 Para 9, part 2 of 2",
+        "rbi-nbfc-responsible-business-conduct-2025 Para 36",
+        "rbi-nbfc-responsible-business-conduct-2025 Para 80",
+        "rbi-nbfc-responsible-business-conduct-2025 Para 14",
+        "rbi-nbfc-credit-facilities-2025 Para 48"
+      ]
+    },
+    {
+      "id": "cf-02",
+      "kind": "direct",
+      "firstHitRank": 1,
+      "bestSimilarityTop8": 0.8498157321749286,
+      "pinned": false,
+      "top5": [
+        "rbi-nbfc-credit-facilities-2025 Para 11",
+        "rbi-nbfc-credit-facilities-2025 Para 4, part 2 of 7",
+        "rbi-nbfc-credit-facilities-2025 Para 38",
+        "rbi-nbfc-credit-facilities-2025 Para 107",
+        "rbi-nbfc-responsible-business-conduct-2025 Para 29, part 1 of 3"
+      ]
+    },
+    {
+      "id": "cf-03",
+      "kind": "direct",
+      "firstHitRank": 1,
+      "bestSimilarityTop8": 0.7825030761964559,
+      "pinned": false,
+      "top5": [
+        "rbi-nbfc-credit-facilities-2025 Para 12",
+        "rbi-nbfc-credit-facilities-2025 Para 6",
+        "rbi-nbfc-credit-facilities-2025 Para 4, part 2 of 7",
+        "rbi-nbfc-credit-facilities-2025 Para 7",
+        "rbi-nbfc-responsible-business-conduct-2025 Para 100"
+      ]
+    },
+    {
+      "id": "cf-04",
+      "kind": "citation",
+      "firstHitRank": 1,
+      "bestSimilarityTop8": 0.7189058213683843,
+      "pinned": true,
+      "top5": [
+        "rbi-nbfc-credit-facilities-2025 Para 18, part 1 of 2",
+        "rbi-nbfc-credit-facilities-2025 Para 18, part 2 of 2",
+        "rbi-nbfc-kyc-2025 Para 18",
+        "rbi-nbfc-responsible-business-conduct-2025 Para 18",
+        "rbi-nbfc-credit-facilities-2025 Para 112"
+      ]
+    },
+    {
+      "id": "cf-05",
+      "kind": "paraphrase",
+      "firstHitRank": 11,
+      "bestSimilarityTop8": 0.786594552233455,
+      "pinned": false,
+      "top5": [
+        "rbi-nbfc-credit-facilities-2025 Para 9, part 1 of 2",
+        "rbi-nbfc-credit-facilities-2025 Para 8",
+        "rbi-nbfc-responsible-business-conduct-2025 Para 46",
+        "rbi-nbfc-responsible-business-conduct-2025 Para 44",
+        "rbi-nbfc-responsible-business-conduct-2025 Para 57"
+      ]
+    },
+    {
+      "id": "dpdp-01",
+      "kind": "paraphrase",
+      "firstHitRank": 2,
+      "bestSimilarityTop8": 0.7063389808363824,
+      "pinned": false,
+      "top5": [
+        "rbi-nbfc-kyc-2025 Para 53",
+        "dpdp-rules-2025 Rule 7",
+        "dpdp-rules-2025 Rule 6",
+        "rbi-nbfc-kyc-2025 Para 40",
+        "rbi-nbfc-credit-facilities-2025 Para 14"
+      ]
+    },
+    {
+      "id": "dpdp-02",
+      "kind": "direct",
+      "firstHitRank": 1,
+      "bestSimilarityTop8": 0.8725567091900049,
+      "pinned": false,
+      "top5": [
+        "dpdp-rules-2025 Rule 3",
+        "dpdp-rules-2025 Rule 14",
+        "dpdp-rules-2025 Rule 9",
+        "dpdp-rules-2025 First Schedule, Part B, Item 8",
+        "dpdp-rules-2025 Fourth Schedule, Part B, Item 6"
+      ]
+    },
+    {
+      "id": "dpdp-03",
+      "kind": "direct",
+      "firstHitRank": 1,
+      "bestSimilarityTop8": 0.8902234638536507,
+      "pinned": false,
+      "top5": [
+        "dpdp-rules-2025 Rule 6",
+        "dpdp-rules-2025 Rule 13",
+        "dpdp-rules-2025 Rule 7",
+        "dpdp-rules-2025 First Schedule, Part B, Item 7",
+        "dpdp-rules-2025 Third Schedule, Item 1"
+      ]
+    },
+    {
+      "id": "dpdp-04",
+      "kind": "direct",
+      "firstHitRank": 1,
+      "bestSimilarityTop8": 0.8315263290123313,
+      "pinned": false,
+      "top5": [
+        "dpdp-rules-2025 Rule 8, part 1 of 2",
+        "dpdp-rules-2025 Rule 8, part 2 of 2",
+        "dpdp-rules-2025 Seventh Schedule, Item 2",
+        "dpdp-rules-2025 Rule 10, part 3 of 3",
+        "rbi-nbfc-credit-facilities-2025 Para 14"
+      ]
+    },
+    {
+      "id": "dpdp-05",
+      "kind": "direct",
+      "firstHitRank": 1,
+      "bestSimilarityTop8": 0.8633605661964221,
+      "pinned": false,
+      "top5": [
+        "dpdp-rules-2025 Rule 10, part 3 of 3",
+        "dpdp-rules-2025 Rule 10, part 2 of 3",
+        "dpdp-rules-2025 Rule 10, part 1 of 3",
+        "dpdp-rules-2025 First Schedule, Part B, Item 1",
+        "dpdp-rules-2025 Rule 6"
+      ]
+    },
+    {
+      "id": "rbc-01",
+      "kind": "direct",
+      "firstHitRank": null,
+      "bestSimilarityTop8": 0.6295540907125219,
+      "pinned": false,
+      "top5": [
+        "rbi-nbfc-credit-facilities-2025 Para 9, part 1 of 2",
+        "dpdp-rules-2025 Fourth Schedule, Part B, Item 6",
+        "rbi-nbfc-kyc-2025 Para 6",
+        "rbi-nbfc-kyc-2025 Para 63, part 3 of 3",
+        "rbi-nbfc-kyc-2025 Para 52"
+      ]
+    },
+    {
+      "id": "rbc-02",
+      "kind": "paraphrase",
+      "firstHitRank": 1,
+      "bestSimilarityTop8": 0.7822735283186416,
+      "pinned": false,
+      "top5": [
+        "rbi-nbfc-responsible-business-conduct-2025 Para 30, part 1 of 3",
+        "rbi-nbfc-responsible-business-conduct-2025 Para 30, part 2 of 3",
+        "rbi-nbfc-responsible-business-conduct-2025 Para 39",
+        "rbi-nbfc-responsible-business-conduct-2025 Para 30, part 3 of 3",
+        "rbi-nbfc-responsible-business-conduct-2025 Para 13"
+      ]
+    },
+    {
+      "id": "rbc-03",
+      "kind": "paraphrase",
+      "firstHitRank": 7,
+      "bestSimilarityTop8": 0.727706871404721,
+      "pinned": false,
+      "top5": [
+        "rbi-nbfc-credit-facilities-2025 Para 9, part 2 of 2",
+        "rbi-nbfc-responsible-business-conduct-2025 Para 90",
+        "rbi-nbfc-responsible-business-conduct-2025 Annex I, part 2 of 2",
+        "rbi-nbfc-responsible-business-conduct-2025 Para 39",
+        "rbi-nbfc-responsible-business-conduct-2025 Para 95"
+      ]
+    },
+    {
+      "id": "rbc-04",
+      "kind": "direct",
+      "firstHitRank": 1,
+      "bestSimilarityTop8": 0.8588453289516124,
+      "pinned": false,
+      "top5": [
+        "rbi-nbfc-responsible-business-conduct-2025 Para 39",
+        "rbi-nbfc-responsible-business-conduct-2025 Para 40",
+        "rbi-nbfc-responsible-business-conduct-2025 Para 69",
+        "rbi-nbfc-responsible-business-conduct-2025 Para 35",
+        "rbi-nbfc-responsible-business-conduct-2025 Para 38"
+      ]
+    }
+  ],
+  "unanswerable": [
+    {
+      "id": "out-01",
+      "kind": "out-of-domain",
+      "bestSimilarityTop8": 0.7155607851336996
+    },
+    {
+      "id": "out-02",
+      "kind": "out-of-domain",
+      "bestSimilarityTop8": 0.7160477262948799
+    },
+    {
+      "id": "out-03",
+      "kind": "out-of-domain",
+      "bestSimilarityTop8": 0.5671483136039118
+    },
+    {
+      "id": "out-04",
+      "kind": "near-miss",
+      "bestSimilarityTop8": 0.625328831276647
+    },
+    {
+      "id": "out-05",
+      "kind": "near-miss",
+      "bestSimilarityTop8": 0.703686630286425
+    },
+    {
+      "id": "out-06",
+      "kind": "near-miss",
+      "bestSimilarityTop8": 0.708270261700091
+    },
+    {
+      "id": "out-07",
+      "kind": "near-miss",
+      "bestSimilarityTop8": 0.639722666756949
+    },
+    {
+      "id": "out-08",
+      "kind": "near-miss",
+      "bestSimilarityTop8": 0.690353247418092
+    },
+    {
+      "id": "out-09",
+      "kind": "near-miss",
+      "bestSimilarityTop8": 0.7263598768282135
+    },
+    {
+      "id": "out-10",
+      "kind": "near-miss",
+      "bestSimilarityTop8": 0.6771762389856402
+    }
+  ]
+}

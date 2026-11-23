@@ -57,6 +57,26 @@ public class SearchRegulationsTests
     }
 
     [Fact]
+    public async Task SkipsTheEmbeddingInKeywordOnlyMode()
+    {
+        var result = await Search(new SearchOptions { Mode = SearchMode.KeywordOnly, KeywordScoring = KeywordScoring.Bm25 })
+            .RunAsync("Rule 7", 8, TestContext.Current.CancellationToken);
+
+        _embedded.Should().BeEmpty();
+        result.Degraded.Should().BeNull();
+        await _search.Received(1).HybridAsync(
+            Arg.Is<SearchQuery>(q => !q.HasVector && q.UseKeywords && q.Scoring == KeywordScoring.Bm25), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task TurnsTheKeywordSideOffInDenseOnlyMode()
+    {
+        await Search(new SearchOptions { Mode = SearchMode.DenseOnly }).RunAsync("Rule 7", 8, TestContext.Current.CancellationToken);
+
+        await _search.Received(1).HybridAsync(Arg.Is<SearchQuery>(q => q.HasVector && !q.UseKeywords), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
     public async Task StopsAtTopK()
     {
         var result = await Run("What is a Key Fact Statement?", topK: 2);
@@ -92,8 +112,8 @@ public class SearchRegulationsTests
     private Task<SearchResult> Run(string question, int topK = 8) =>
         Search().RunAsync(question, topK, TestContext.Current.CancellationToken);
 
-    private SearchRegulations Search() =>
-        new(_search, _generator, Options.Create(new SearchOptions()), NullLogger<SearchRegulations>.Instance);
+    private SearchRegulations Search(SearchOptions? options = null) =>
+        new(_search, _generator, Options.Create(options ?? new SearchOptions()), NullLogger<SearchRegulations>.Instance);
 
     private static SearchHit Hit(long id, double score) =>
         new(id, "doc", "Title", $"Para {id}", "", 1, 1, "excerpt", 1, 1, score);

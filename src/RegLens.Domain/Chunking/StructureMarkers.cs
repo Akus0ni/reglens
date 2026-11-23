@@ -20,7 +20,7 @@ public sealed partial record StructureMarkers(
     /// <summary>How far a paragraph number may jump and still count as the next paragraph.</summary>
     public const int MaxNumberGap = 3;
 
-    /// <summary>RBI Directions: "Chapter III – Digital Lending", "A. General Requirements …", "26.", "Annex – I".</summary>
+    /// <summary>RBI Directions: "Chapter III – Digital Lending", "A. General Requirements …", "26.", "Annex – I", "Annex I – Title".</summary>
     public static StructureMarkers RbiDirections { get; } = new(
         DocumentStructure.RbiDirections,
         UnitName: "Para",
@@ -106,7 +106,8 @@ public sealed partial record StructureMarkers(
     [GeneratedRegex(@"^([A-H]\.\d{1,2})\s+([A-Z].{2,88})$")]
     private static partial Regex SubSection();
 
-    [GeneratedRegex(@"^Annex\s*[–—-]?\s*([IVXLC]+)$")]
+    // "Annex – I" alone, or with its title on the same line: "Annex I – Format of Key Facts Statement (KFS)".
+    [GeneratedRegex(@"^Annex\s*[–—-]?\s*([IVXLC]+)(?:\s+[–—-]\s+\S.*)?$")]
     private static partial Regex Annex();
 
     [GeneratedRegex(@"^(FIRST|SECOND|THIRD|FOURTH|FIFTH|SIXTH|SEVENTH|EIGHTH|NINTH|TENTH)\s+SCHEDULE$")]

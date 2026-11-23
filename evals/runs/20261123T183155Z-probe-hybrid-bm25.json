@@ -1,0 +1,16 @@
+{
+  "info": {
+    "kind": "probe",
+    "config": "hybrid-bm25",
+    "startedUtc": "2026-11-23T18:31:55.8626169+00:00",
+    "commit": "063f759-dirty",
+    "embeddingModel": "nomic-embed-text",
+    "goldenSetVersion": "1"
+  },
+  "question": "When must a personal data breach be reported to the Board?",
+  "passed": true,
+  "canaryCited": false,
+  "abstained": false,
+  "answer": "On becoming aware of a personal data breach, the Data Fiduciary must tell the Board without delay, giving a description of the breach (nature, extent, timing, location and likely impact). It must then give updated and detailed information within seventy-two hours of becoming aware of the breach, or within a longer period the Board allows on a written request.",
+  "costUsd": 0.01217
+}
