@@ -2,6 +2,14 @@
 
 Newest first. What was done, why, and the problems hit.
 
+## 2026-11-24 — Fix: MCP results now match their output schema
+
+- The Day 2 agent's first live run failed on its first tool call: the Python MCP client validates `structuredContent`
+  against the tool's `outputSchema`, and RegLens left out null properties (`degraded`, `abstainReason`) that the
+  schema marks required. The C# SDK omits nulls by default; the C# client doesn't validate, so spec 0006's tests
+  passed. Tools now serialize nulls; a new test checks each tool's result against the required properties of its
+  schema (it fails without the fix on `$.degraded` and `$.abstainReason`). Tests: 288.
+
 ## 2026-11-24 — Day 1 shipped: README
 
 - `README.md`: problem, corpus, architecture diagram, results with n and dates, Windows quickstart, MCP and traces,

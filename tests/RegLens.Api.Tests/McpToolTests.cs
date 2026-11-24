@@ -92,6 +92,24 @@ public sealed class McpToolTests : IDisposable
         Text(result).Should().Contain("question: The question is required.");
     }
 
+    // Clients that validate structuredContent against outputSchema (the Python MCP SDK does) reject a result that
+    // leaves out a required property, even a null one.
+    [Theory]
+    [InlineData("search_regulations", "query", "data breach")]
+    [InlineData("get_passage", "chunkId", 42)]
+    [InlineData("ask_regulations", "question", "When must a breach be reported?")]
+    public async Task ResultsHaveEveryPropertyTheirOutputSchemaRequires(string tool, string parameter, object value)
+    {
+        await using var client = await _api.ConnectAsync();
+        var schema = (await client.ListToolsAsync(cancellationToken: TestContext.Current.CancellationToken))
+            .Single(t => t.Name == tool).ProtocolTool.OutputSchema!.Value;
+
+        var result = await client.CallToolAsync(
+            tool, new Dictionary<string, object?> { [parameter] = value }, cancellationToken: TestContext.Current.CancellationToken);
+
+        MissingRequired(schema, Structured(result), "$").Should().BeEmpty();
+    }
+
     [Fact]
     public async Task RefusesAClientWithoutTheKey()
     {
@@ -108,6 +126,37 @@ public sealed class McpToolTests : IDisposable
 
     private static JsonElement Structured(CallToolResult result) =>
         JsonDocument.Parse(JsonSerializer.Serialize(result.StructuredContent)).RootElement;
+
+    private static List<string> MissingRequired(JsonElement schema, JsonElement value, string path)
+    {
+        var missing = new List<string>();
+        if (value.ValueKind == JsonValueKind.Object && schema.TryGetProperty("properties", out var properties))
+        {
+            if (schema.TryGetProperty("required", out var required))
+            {
+                missing.AddRange(required.EnumerateArray().Select(r => r.GetString()!)
+                    .Where(name => !value.TryGetProperty(name, out _)).Select(name => $"{path}.{name}"));
+            }
+
+            foreach (var property in properties.EnumerateObject())
+            {
+                if (value.TryGetProperty(property.Name, out var child))
+                {
+                    missing.AddRange(MissingRequired(property.Value, child, $"{path}.{property.Name}"));
+                }
+            }
+        }
+        else if (value.ValueKind == JsonValueKind.Array && schema.TryGetProperty("items", out var items))
+        {
+            var index = 0;
+            foreach (var item in value.EnumerateArray())
+            {
+                missing.AddRange(MissingRequired(items, item, $"{path}[{index++}]"));
+            }
+        }
+
+        return missing;
+    }
 
     private static string Text(CallToolResult result) =>
         string.Join(" ", result.Content.OfType<TextContentBlock>().Select(block => block.Text));
