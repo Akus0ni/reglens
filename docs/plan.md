@@ -78,6 +78,8 @@ product features for compliance.
 | D62 | API and Ingest export OpenTelemetry to the Aspire dashboard, with prompt and answer text in spans (`Telemetry:CaptureContent`, default on) (spec 0006) | Owner | 2026-11-24 |
 | D63 | `GET /passages/{id}` gives REST the same three operations as MCP (spec 0006) | Owner | 2026-11-24 |
 | D64 | Spend cap for spec 0006's paid checks: $0.50 | Owner | 2026-11-24 |
+| D56 | hybrid-bm25 stays the default after spec 0005, although dense scored higher (recall@5 0.95 vs 0.90, MRR@10 0.931 vs 0.907, n = 20): the gap is one question, and the keyword side keeps exact-term queries (paragraph numbers, G.S.R. numbers). Revisit with a larger golden set. Confirms D49 | Owner | 2026-11-24 |
+| D57 | Generated contexts that invent structure (2 of 512: DPDP Rules 7 and 14 placed in chapters the Rules do not have) are accepted as a known limitation; no prompt change for observed errors (spec 0005 §10, A5) | Owner | 2026-11-24 |
 
 ## 3. Open questions
 
