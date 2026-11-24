@@ -2,6 +2,14 @@
 
 Newest first. What was done, why, and the problems hit.
 
+## 2026-11-24 — Spec 0005 follow-ups
+
+- A5: checked every chunk context that names a chapter. Two DPDP contexts (Rules 7 and 14) invent chapters; the corrigendum
+  dates and all RBI chapter references are right. Accepted as a known limitation (D57).
+- hybrid-bm25 stays the default although dense now scores higher on n = 20 (D56).
+- `scripts/delete-merged-branch.sh` sets `MSYS_NO_PATHCONV=1`, so Git Bash no longer rewrites `main:.claude/…` arguments
+  as Windows paths.
+
 ## 2026-11-24 — Spec 0005: contextual retrieval and heading fixes built
 
 - Chunker 2 fixes H1–H5 (section letters A–Z, wrapped headings, contents-page sections, 105A / 11A). A re-chunk

@@ -4,6 +4,8 @@
 # checking the branch's added lines against main does not.
 # Usage: scripts/delete-merged-branch.sh <branch> <pr-number>
 set -euo pipefail
+# Git Bash rewrites arguments like `main:.claude/x` as Windows paths; keep them as written.
+export MSYS_NO_PATHCONV=1
 branch="${1:?branch name}"; pr="${2:?PR number}"
 
 state=$(gh pr view "$pr" --json state --jq .state)

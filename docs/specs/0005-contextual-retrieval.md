@@ -294,7 +294,12 @@ loans calling before 9:00 a.m. or after 6:00 p.m. is a harsh method (Para 91). 2
 
 **A9, spend:** $0.0006 (usage probe) + $0.2746 (contexts) + $0.557 (answer eval) + $0.009 (A8) = **$0.84** of the $2 cap.
 
-**A5** (owner): sampled contexts are in the PR body.
+**A5** (owner, PR #16): the sampled contexts are in the PR body. A check of all 512 against the PDFs' structure found
+two errors, both in the DPDP Rules, which have no chapters: Rule 7's context places it in a "Chapter on security
+safeguards" and Rule 14's in a "Chapter on obligations of Data Fiduciaries" (Rule 14 is "Rights of Data Principals").
+No RBI context's chapter number contradicts its heading (389 name one); the 26 annex and preamble contexts that name a
+chapter cite the paragraphs that refer to them, and those headings confirm it. The owner accepted the two as a known
+limitation (D57): contexts only feed retrieval (D52), and fixing two observed errors would be tuning (P1).
 
 ## 11. Sources (checked 2026-11-24)
 
