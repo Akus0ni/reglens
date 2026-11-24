@@ -1,6 +1,6 @@
 # Spec 0005 — Contextual retrieval and heading fixes
 
-> Status: **Draft** · Created: 2026-11-24 · Owner: @Akus0ni
+> Status: **Approved (PR #15, 2026-11-24) · Implemented in `feat/0005-contextual-retrieval`** · Created: 2026-11-24 · Owner: @Akus0ni
 > Depends on: specs 0001–0004 · Blocked by open questions: none
 > Sprint phase: D1·5
 
@@ -211,7 +211,92 @@ from so few questions.
 |---|----------|--------|
 | — | None | — |
 
-## 9. Sources (checked 2026-11-24)
+## 9. Changes made while building
+
+| Where | Change | Why |
+|-------|--------|-----|
+| R5.6, P3 | How `IChatClient` reports usage was measured, not assumed (one 2-call probe, about $0.0006): `InputTokenCount` is all input, `CachedInputTokenCount` the cache reads, and cache writes appear only as `AdditionalCounts["CacheCreationInputTokens"]`. Uncached input = input − reads − writes. At effort low Haiku 5.5 returned no thinking | The XML docs do not say; P10 needs the split |
+| R5.6, A1 | `AIContentCacheExtensions.GetCacheControl` is **internal** in 13.12.0 (reflection), although the XML docs list it. The test checks the public marker `AdditionalProperties["anthropic:cache_control"]` instead | Compile error |
+| R5.8 | A model call that the SDK times out arrives as `OperationCanceledException` without the caller cancelling; it is wrapped as a context failure naming the chunk, like any other error | Otherwise the error would not name the document and chunk |
+| P5 | `input_hash` = SHA-256 of prompt version, model, **SHA-256 of the document text**, heading, `para_ref` and chunk text, joined by NUL | Same content addressing as P5, without hashing 60k tokens 168 times |
+| P1 | Chunk text goes in raw, as in the cookbook; only the `heading` and `ref` attribute values are escaped. The document block is raw too | Escaping one copy of the text and not the other would make them differ |
+| P8 | There is no API ingest trigger (D23 was never built), so `Context:Enabled` lives in the Ingest host's settings only | Nothing to configure in the API |
+| P10 | The price table moved from `RegLens.Evals` to `RegLens.Application` (`ModelPricing`, with cache write/read prices) so ingestion can report cost | Ingest cannot reference the eval runner |
+| R5.15 | `results.md` groups runs by pipeline; runs saved before this spec count as `chunker 1; no context`. The 0004 hand-check row moved to `evals/hand-checks.json` (a regenerated report used to drop it) and the filled 0004 sheet to `evals/judge-check-0004.md` (the stage-3 answer run would have overwritten it). The runner refuses an index that mixes pipelines | Keep the record intact |
+| A1 | H1–H5 test fixtures lower paragraph and chapter numbers (97 → 1, IV → III): a first paragraph must be within `MaxNumberGap` (3) of 0 | Otherwise the fixtures test the gap rule, not the fix |
+| A2 | `scripts/chunk-diff.cs` (a .NET 10 file-based app) re-chunks the PDFs with no database or model and diffs against an export of the stored chunks | The comparison R5.5 asks for |
+
+## 10. Results (2026-11-24; 5 documents, 512 chunks; `nomic-embed-text:latest`)
+
+**A2, re-chunk comparison** (chunker 1 → 2, `scripts/chunk-diff.cs`): exactly the §1 changes, 13 in all, 513 → 512 chunks. Credit
+Facilities and DPDP Rules: no change. KYC: `Annex I, Para 11A` added and Para 11 part 2 shortened (H5). RBC: Paras 98–101
+re-headed to section I and Para 97 loses the heading text it had swallowed (H1); section D's heading is complete and its
+orphan chunk is gone (H2); the TOC-titled chunk is gone and the Preamble takes the enacting formula (H3); `Para 105A` replaces
+the chunk titled "E. Measures …" (H4).
+
+**A3, context generation** (`claude-haiku-5-5`, effort low, prompt v1; 208 s, concurrency 4):
+
+| Document | Chunks | Uncached in | Cache write | Cache read | Out | Cost |
+|----------|--------|-------------|-------------|------------|-----|------|
+| KYC | 168 | 83,963 | 62,545 | 10,445,015 | 31,263 | $0.1363 |
+| Credit Facilities | 131 | 46,042 | 30,831 | 4,008,030 | 23,425 | $0.0603 |
+| RBC | 122 | 39,314 | 22,561 | 2,729,881 | 22,775 | $0.0454 |
+| DPDP Rules | 90 | 31,088 | 20,458 | 1,820,762 | 16,886 | $0.0323 |
+| DPDP corrigendum | 1 | 787 | 876 | 0 | 130 | $0.0003 |
+| **Total** | **512** | 201,194 | 137,271 | 19,003,688 | 94,479 | **$0.2746** |
+
+One cache write per document, then reads: 98.2% of input tokens were cache reads. Contexts average 499 characters
+(max 873; none empty or over 2,000). Without caching the same input would have cost about $1.93.
+
+**A4:** a second ingest with nothing changed skipped all five documents and made no Anthropic call (run without
+`ANTHROPIC_API_KEY` visible). A forced RBC re-ingest took all 122 contexts from `chunk_contexts`: $0.
+
+**A6, retrieval** (n = 20, no LLM). Stage 1 = spec 0004's saved runs; stage 2 = chunker 2, no context; stage 3 = chunker 2
+with context:
+
+| Configuration | recall@5 s1 / s2 / s3 | recall@8 s1 / s2 / s3 | MRR@10 s1 / s2 / s3 |
+|---------------|-----------------------|-----------------------|---------------------|
+| dense | 0.80 / 0.80 / **0.95** | 0.85 / 0.85 / **1.00** | 0.788 / 0.788 / **0.931** |
+| keyword-tsrank | 0.60 / 0.60 / 0.75 | 0.75 / 0.75 / 0.80 | 0.391 / 0.391 / 0.461 |
+| keyword-bm25 | 0.80 / 0.80 / 0.85 | 0.80 / 0.80 / 0.90 | 0.722 / 0.722 / 0.768 |
+| hybrid-tsrank | 0.80 / 0.80 / 0.90 | 0.85 / 0.85 / 0.95 | 0.637 / 0.637 / 0.760 |
+| **hybrid-bm25** (D49) | 0.85 / 0.85 / **0.90** | 0.85 / 0.85 / **0.95** | 0.772 / 0.772 / **0.907** |
+
+- The heading fixes changed no golden-set rank (stage 2 = stage 1 in every configuration), so the stage 3 change is
+  the context's.
+- The three 0004 misses, hybrid-bm25 rank s1 → s3: **rbc-01** none → **1**; **dpdp-01** 10 → **7** (now inside the 8
+  passages sent); **cf-05** none → 17 (still a miss). Also cf-01 3 → 1, cf-04 2 → 1, rbc-03 2 → 1.
+- Dense alone is now the best configuration on this golden set. With n = 20 the gap to hybrid-bm25 is one question at
+  recall@5 and 0.024 MRR; the default (D49) is unchanged — an owner decision, not this spec's.
+
+**R5.16, floor** (D48, hybrid-bm25 stage 3): lowest non-pinned answerable best similarity 0.657 (rbc-01, n = 19) →
+**0.63** (was 0.60), applied in `AnswerOptions` and both `appsettings.json`. It stops 1 of 10 unanswerable (out-03,
+0.554), the same count as before: the context lifts unanswerable similarities too (now 0.554–0.741).
+
+**A7, answers** (hybrid-bm25, `claude-sonnet-5-5` effort medium, floor 0.63, judge `claude-haiku-4-5`, prompt v3, n = 30):
+
+| Metric | Spec 0004 | Spec 0005 |
+|--------|-----------|-----------|
+| Abstained on unanswerable | 10/10 | 10/10 (9 by Claude, 1 by the floor) |
+| Wrongly abstained on answerable | 2/20 | **0/20** |
+| Answered and cited an expected paragraph | 17/18 | **19/20**; cf-05 answered from Paras 7 and 16 (retrieval miss) |
+| Citations dropped by the verifier | 0 | 0 |
+| Groundedness (judge, 1–5) | 4.89 (n = 18) | 4.90 (n = 20) |
+| Relevance (judge, 1–5) | 4.33 (n = 18) | 4.45 (n = 20); lowest cf-05 = 3 |
+| Cost | $0.332 + unrecorded judge | **$0.557** (answers and judge) |
+| p50 latency | 4.3 s | 3.6 s |
+
+The run's commit is `e08fff8-dirty`: the floor change and docs were not yet committed.
+
+**A8:** `POST /ask` "Can a recovery agent call me late at night about an overdue loan?" answered that for non-microfinance
+loans calls before 8:00 a.m. or after 7:00 p.m. are not allowed (Para 100, two verified quotes) and that for microfinance
+loans calling before 9:00 a.m. or after 6:00 p.m. is a harsh method (Para 91). 2,817 in / 321 out, about $0.009.
+
+**A9, spend:** $0.0006 (usage probe) + $0.2746 (contexts) + $0.557 (answer eval) + $0.009 (A8) = **$0.84** of the $2 cap.
+
+**A5** (owner): sampled contexts are in the PR body.
+
+## 11. Sources (checked 2026-11-24)
 
 - Anthropic, "Introducing Contextual Retrieval" (19 Sep 2024): https://www.anthropic.com/engineering/contextual-retrieval.
   Covers the prompt, the 35% / 49% / 67% reductions in top-20 retrieval failure, "usually 50-100 tokens", context

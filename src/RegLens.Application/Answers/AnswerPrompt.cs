@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.AI;
+using static RegLens.Application.PromptText;
 
 namespace RegLens.Application.Answers;
 
@@ -13,12 +14,13 @@ public sealed record DraftCitation(long ChunkId, string Quote);
 
 /// <summary>
 /// The fixed prompt and the answer schema (spec 0003, §5, P4). Passages are untrusted data: they go in the user
-/// message, inside tags, with &lt; &gt; &amp; escaped so a passage cannot close its own tag.
+/// message, inside tags, with &lt; &gt; &amp; escaped so a passage cannot close its own tag. v3 adds each passage's
+/// heading path, so the model can tell which part of a document a paragraph governs (spec 0005, P11, R5.14).
 /// </summary>
 public static class AnswerPrompt
 {
     /// <summary>Part of the cache key; bump it whenever the prompt or the schema changes (P8).</summary>
-    public const string Version = "v2";
+    public const string Version = "v3";
 
     public const string System = """
         You answer questions about Indian NBFC regulation using only the passages in the user message.
@@ -57,7 +59,7 @@ public static class AnswerPrompt
                 ? passage.PageStart.ToString(CultureInfo.InvariantCulture)
                 : string.Create(CultureInfo.InvariantCulture, $"{passage.PageStart}-{passage.PageEnd}");
             builder.Append(CultureInfo.InvariantCulture,
-                    $"<passage id=\"{passage.ChunkId}\" document=\"{EscapeAttribute(passage.DocumentTitle)}\" ref=\"{EscapeAttribute(passage.ParaRef)}\" pages=\"{pages}\">")
+                    $"<passage id=\"{passage.ChunkId}\" document=\"{EscapeAttribute(passage.DocumentTitle)}\" ref=\"{EscapeAttribute(passage.ParaRef)}\" heading=\"{EscapeAttribute(passage.Heading)}\" pages=\"{pages}\">")
                 .Append(Escape(passage.Content))
                 .AppendLine("</passage>");
         }
@@ -79,13 +81,4 @@ public static class AnswerPrompt
             return null;
         }
     }
-
-    // Only what could end a tag (P4). WebUtility.HtmlEncode would also rewrite § and other Latin-1 characters as
-    // &#167;, which the model would then copy into its quotes.
-    private static string Escape(string text) => text
-        .Replace("&", "&amp;", StringComparison.Ordinal)
-        .Replace("<", "&lt;", StringComparison.Ordinal)
-        .Replace(">", "&gt;", StringComparison.Ordinal);
-
-    private static string EscapeAttribute(string text) => Escape(text).Replace("\"", "&quot;", StringComparison.Ordinal);
 }

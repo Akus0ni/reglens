@@ -35,7 +35,7 @@ public sealed class AskEndpointTests : IDisposable
         search.FindByCitationsAsync(Arg.Any<IReadOnlyList<Citation>>(), Arg.Any<SearchQuery>(), Arg.Any<CancellationToken>()).Returns([]);
         var passages = Substitute.For<IPassageReader>();
         passages.GetAsync(Arg.Any<IReadOnlyList<long>>(), Arg.Any<CancellationToken>())
-            .Returns([new StoredPassage(42, "dpdp-rules-2025", "DPDP Rules, 2025", "Rule 7", 26, 26, $"7. Intimation of breach. {Quote}.")]);
+            .Returns([new StoredPassage(42, "dpdp-rules-2025", "DPDP Rules, 2025", "Rule 7", "", 26, 26, $"7. Intimation of breach. {Quote}.")]);
         var indexVersion = Substitute.For<IIndexVersion>();
         indexVersion.GetAsync(Arg.Any<CancellationToken>()).Returns(Guid.NewGuid().ToString());
         _chat.GetResponseAsync(Arg.Any<IEnumerable<ChatMessage>>(), Arg.Any<ChatOptions?>(), Arg.Any<CancellationToken>())

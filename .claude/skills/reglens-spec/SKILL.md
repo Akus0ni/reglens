@@ -64,6 +64,7 @@ If the hook blocks you, create the right branch; never work around it.
 |------|------|
 | Runtime | C# on .NET 10, ASP.NET Core minimal APIs. Solution file `RegLens.slnx` |
 | Chat models | `claude-sonnet-5-5` for answers; `claude-haiku-5-5` for chunk context (D50); `claude-haiku-4-5` as the eval judge. Via the official `Anthropic` NuGet package's `AsIChatClient(model)` behind `Microsoft.Extensions.AI.IChatClient` |
+| Chunk context | Spec 0005: Anthropic's cookbook prompt (`ContextPrompt`), document block cached (5-minute `WithCacheControl`), first chunk alone then `Context:Concurrency`. Stored in `chunk_contexts` by input hash. Used for embedding and BM25 only, **never sent to the answer model** (D52). Bump `DocumentChunker.Version` / `ContextPrompt.Version` whenever chunks or contexts would change: `documents.pipeline` makes stale documents re-ingest |
 | Embeddings | Local Ollama `nomic-embed-text` (768 dims) via OllamaSharp's `IEmbeddingGenerator`. Not `Microsoft.Extensions.AI.Ollama` (deprecated). Anthropic has no embedding model. Check the model card for the document/query task prefixes |
 | Store | Postgres 17 + pgvector, one `chunks` table: `vector(768)` with HNSW `vector_cosine_ops`, plus a generated `tsvector` with GIN |
 | Retrieval | Dense top-40 + keyword top-40, fused with RRF (k = 60), top-8. Keyword side ranks by **BM25 computed in our SQL** (D43, D49; migration 003 statistics, refreshed on ingest); `ts_rank_cd` remains as an eval configuration and is **not BM25** |

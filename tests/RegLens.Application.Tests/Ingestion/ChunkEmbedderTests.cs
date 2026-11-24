@@ -24,6 +24,16 @@ public class ChunkEmbedderTests
     }
 
     [Fact]
+    public void EmbedsTheContextThenABlankLineThenTheChunk() // R5.11, P7
+    {
+        var embedder = Embedder();
+
+        embedder.EmbeddingInput(new ContextualChunk(Chunk("1. Text."), "Situates the chunk."))
+            .Should().Be("search_document: Situates the chunk.\n\n1. Text.");
+        embedder.EmbeddingInput(new ContextualChunk(Chunk("1. Text."), null)).Should().Be("search_document: 1. Text.");
+    }
+
+    [Fact]
     public async Task FailsWhenTheModelReturnsTheWrongNumberOfDimensions()
     {
         _generator.GenerateAsync(Arg.Any<IEnumerable<string>>(), Arg.Any<EmbeddingGenerationOptions?>(), Arg.Any<CancellationToken>())

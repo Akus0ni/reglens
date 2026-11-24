@@ -58,7 +58,7 @@
       "sha256": "783413a9bbc8e0090b88ed0d2bfe039d2c2b2e54c23851b8bdbd819fe4c6f111",
       "language": "English (cover lines in Hindi)",
       "structure": "rbi-directions",
-      "notes": "Added by spec 0004 (D41). Credit Facilities Para 9 points here for the Key Facts Statement; Annex I (pages 34-35) is the KFS format. The KFS illustration tables (pages 12-13) extract as loose numbers. Annex II is marked deleted. Paragraph 105A folds into Para 105 (the chunker numbers paragraphs with digits only)."
+      "notes": "Added by spec 0004 (D41). Credit Facilities Para 9 points here for the Key Facts Statement; Annex I (pages 34-35) is the KFS format. The KFS illustration tables (pages 12-13) extract as loose numbers. Annex II is marked deleted. Paragraph 105A is its own chunk since chunker 2 (spec 0005, H4)."
     },
     {
       "id": "dpdp-rules-2025",

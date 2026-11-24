@@ -35,8 +35,8 @@ public sealed class AnswerQuestionTests : IDisposable
         _search.FindByCitationsAsync(Arg.Any<IReadOnlyList<Citation>>(), Arg.Any<SearchQuery>(), Arg.Any<CancellationToken>()).Returns([]);
         _passages.GetAsync(Arg.Any<IReadOnlyList<long>>(), Arg.Any<CancellationToken>()).Returns(
         [
-            new StoredPassage(42, "dpdp-rules-2025", "DPDP Rules, 2025", "Rule 7", 26, 26, Rule7Text),
-            new StoredPassage(7, "dpdp-rules-2025", "DPDP Rules, 2025", "Rule 6", 25, 25, "6. Reasonable security safeguards."),
+            new StoredPassage(42, "dpdp-rules-2025", "DPDP Rules, 2025", "Rule 7", "", 26, 26, Rule7Text),
+            new StoredPassage(7, "dpdp-rules-2025", "DPDP Rules, 2025", "Rule 6", "", 25, 25, "6. Reasonable security safeguards."),
         ]);
         _indexVersion.GetAsync(Arg.Any<CancellationToken>()).Returns("index-a");
         ModelReplies($$"""{"answer":"Without delay.","abstained":false,"missingInfo":"","citations":[{"chunkId":42,"quote":"{{Quote}}"}]}""");
@@ -243,7 +243,7 @@ public sealed class AnswerQuestionTests : IDisposable
     {
         var key = Answers().CacheKey(" Rule  7 ", 8, "index-a");
 
-        key.Should().StartWith("answer:v2:claude-sonnet-5-5:Medium:index-a:8:")
+        key.Should().StartWith("answer:v3:claude-sonnet-5-5:Medium:index-a:8:")
             .And.Be(Answers().CacheKey("rule 7", 8, "index-a"))
             .And.NotBe(Answers().CacheKey("rule 7", 5, "index-a"));
         key.Should().NotContain("rule");

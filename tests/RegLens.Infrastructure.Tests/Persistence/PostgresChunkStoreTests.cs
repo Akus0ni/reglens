@@ -11,6 +11,8 @@ namespace RegLens.Infrastructure.Tests.Persistence;
 [Collection(PostgresTests.Name)]
 public class PostgresChunkStoreTests(PostgresFixture postgres)
 {
+    private const string Pipeline = "chunker 2; no context";
+
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
     [Fact]
@@ -18,10 +20,53 @@ public class PostgresChunkStoreTests(PostgresFixture postgres)
     {
         var (store, _) = await NewStore();
 
-        (await store.GetStateAsync(Document("a"), Ct)).Should().Be(StoredDocumentState.Missing);
-        await store.ReplaceDocumentAsync(Document("a"), [Embedded("1. Text.")], Ct);
-        (await store.GetStateAsync(Document("a"), Ct)).Should().Be(StoredDocumentState.Current);
-        (await store.GetStateAsync(Document("b"), Ct)).Should().Be(StoredDocumentState.Outdated);
+        (await store.GetStateAsync(Document("a"), Pipeline, Ct)).Should().Be(StoredDocumentState.Missing);
+        await store.ReplaceDocumentAsync(Document("a"), Pipeline, [Embedded("1. Text.")], Ct);
+        (await store.GetStateAsync(Document("a"), Pipeline, Ct)).Should().Be(StoredDocumentState.Current);
+        (await store.GetStateAsync(Document("b"), Pipeline, Ct)).Should().Be(StoredDocumentState.Outdated);
+    }
+
+    [Fact]
+    public async Task ADifferentPipelineMakesTheSameFileOutdated() // R5.10
+    {
+        var (store, _) = await NewStore();
+        await store.ReplaceDocumentAsync(Document("a"), Pipeline, [Embedded("1. Text.")], Ct);
+
+        (await store.GetStateAsync(Document("a"), "chunker 2; context claude-haiku-5-5 v1", Ct))
+            .Should().Be(StoredDocumentState.Outdated);
+        (await store.GetStateAsync(Document("a"), Pipeline, Ct)).Should().Be(StoredDocumentState.Current);
+    }
+
+    [Fact]
+    public async Task ADocumentStoredBeforeMigration004IsOutdated()
+    {
+        var (store, dataSource) = await NewStore();
+        await store.ReplaceDocumentAsync(Document("a"), Pipeline, [Embedded("1. Text.")], Ct);
+        await using (var reset = dataSource.CreateCommand("UPDATE documents SET pipeline = DEFAULT"))
+        {
+            await reset.ExecuteNonQueryAsync(Ct);
+        }
+
+        (await store.GetStateAsync(Document("a"), Pipeline, Ct)).Should().Be(StoredDocumentState.Outdated);
+    }
+
+    [Fact]
+    public async Task StoresTheContextAndIndexesItForKeywordSearch() // P7: tsv already covers context
+    {
+        var (store, dataSource) = await NewStore();
+        var chunk = Embedded("1. The entity shall keep the records.") with { Context = "Lending service provider duties." };
+
+        await store.ReplaceDocumentAsync(Document("a"), Pipeline, [chunk, Embedded("2. No context.")], Ct);
+
+        await using var command = dataSource.CreateCommand("""
+            SELECT para_ref, context, tsv @@ websearch_to_tsquery('english', 'lending service provider')
+            FROM chunks ORDER BY para_ref
+            """);
+        await using var reader = await command.ExecuteReaderAsync(Ct);
+        (await reader.ReadAsync(Ct)).Should().BeTrue();
+        (reader.GetString(1), reader.GetBoolean(2)).Should().Be(("Lending service provider duties.", true));
+        (await reader.ReadAsync(Ct)).Should().BeTrue();
+        reader.IsDBNull(1).Should().BeTrue();
     }
 
     [Fact]
@@ -30,7 +75,7 @@ public class PostgresChunkStoreTests(PostgresFixture postgres)
         var (store, dataSource) = await NewStore();
         var chunk = Embedded("9. An NBFC shall provide a Key Fact Statement to the borrower.", seed: 0.25f);
 
-        await store.ReplaceDocumentAsync(Document("a"), [chunk], Ct);
+        await store.ReplaceDocumentAsync(Document("a"), Pipeline, [chunk], Ct);
 
         await using var command = dataSource.CreateCommand(
             "SELECT embedding, tsv @@ websearch_to_tsquery('english', 'key fact statement') FROM chunks");
@@ -44,9 +89,9 @@ public class PostgresChunkStoreTests(PostgresFixture postgres)
     public async Task ReplacingADocumentRemovesItsOldChunks()
     {
         var (store, dataSource) = await NewStore();
-        await store.ReplaceDocumentAsync(Document("a"), [Embedded("1. One."), Embedded("2. Two."), Embedded("3. Three.")], Ct);
+        await store.ReplaceDocumentAsync(Document("a"), Pipeline, [Embedded("1. One."), Embedded("2. Two."), Embedded("3. Three.")], Ct);
 
-        await store.ReplaceDocumentAsync(Document("b"), [Embedded("1. One, revised.")], Ct);
+        await store.ReplaceDocumentAsync(Document("b"), Pipeline, [Embedded("1. One, revised.")], Ct);
 
         (await Count(dataSource)).Should().Be(1);
     }
@@ -57,7 +102,7 @@ public class PostgresChunkStoreTests(PostgresFixture postgres)
         var (store, dataSource) = await NewStore();
         var chunk = Embedded("1. Repeated boilerplate.");
 
-        await store.ReplaceDocumentAsync(Document("a"), [chunk, chunk], Ct);
+        await store.ReplaceDocumentAsync(Document("a"), Pipeline, [chunk, chunk], Ct);
 
         (await Count(dataSource)).Should().Be(1);
     }
@@ -66,14 +111,14 @@ public class PostgresChunkStoreTests(PostgresFixture postgres)
     public async Task AFailedReplaceLeavesThePreviousVersionIntact()
     {
         var (store, dataSource) = await NewStore();
-        await store.ReplaceDocumentAsync(Document("a"), [Embedded("1. One."), Embedded("2. Two.")], Ct);
+        await store.ReplaceDocumentAsync(Document("a"), Pipeline, [Embedded("1. One."), Embedded("2. Two.")], Ct);
         var wrongDimensions = new EmbeddedChunk(Chunk("1. Broken."), new float[3]);
 
-        var act = () => store.ReplaceDocumentAsync(Document("b"), [wrongDimensions], Ct);
+        var act = () => store.ReplaceDocumentAsync(Document("b"), Pipeline, [wrongDimensions], Ct);
 
         await act.Should().ThrowAsync<PostgresException>();
         (await Count(dataSource)).Should().Be(2);
-        (await store.GetStateAsync(Document("a"), Ct)).Should().Be(StoredDocumentState.Current);
+        (await store.GetStateAsync(Document("a"), Pipeline, Ct)).Should().Be(StoredDocumentState.Current);
     }
 
     private async Task<(PostgresChunkStore Store, NpgsqlDataSource DataSource)> NewStore()

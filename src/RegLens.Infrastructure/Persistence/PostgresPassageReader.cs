@@ -15,7 +15,7 @@ public sealed class PostgresPassageReader(NpgsqlDataSource dataSource) : IPassag
         }
 
         await using var command = dataSource.CreateCommand("""
-            SELECT c.id, c.document_id, d.title, c.para_ref, c.page_start, c.page_end, c.content
+            SELECT c.id, c.document_id, d.title, c.para_ref, c.heading, c.page_start, c.page_end, c.content
             FROM chunks c JOIN documents d ON d.id = c.document_id
             WHERE c.id = ANY(@ids)
             """);
@@ -30,9 +30,10 @@ public sealed class PostgresPassageReader(NpgsqlDataSource dataSource) : IPassag
                 DocumentId: reader.GetString(1),
                 DocumentTitle: reader.GetString(2),
                 ParaRef: reader.GetString(3),
-                PageStart: reader.GetInt32(4),
-                PageEnd: reader.GetInt32(5),
-                Content: reader.GetString(6));
+                Heading: reader.GetString(4),
+                PageStart: reader.GetInt32(5),
+                PageEnd: reader.GetInt32(6),
+                Content: reader.GetString(7));
             byId[passage.ChunkId] = passage;
         }
 

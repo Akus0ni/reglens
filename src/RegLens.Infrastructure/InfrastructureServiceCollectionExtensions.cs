@@ -9,6 +9,7 @@ using RegLens.Application.Answers;
 using RegLens.Application.Ingestion;
 using RegLens.Application.Search;
 using RegLens.Infrastructure.Answers;
+using RegLens.Infrastructure.Context;
 using RegLens.Infrastructure.Corpus;
 using RegLens.Infrastructure.Embeddings;
 using RegLens.Infrastructure.Persistence;
@@ -31,6 +32,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddOptions<OllamaOptions>().BindConfiguration(OllamaOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
         services.AddOptions<EmbeddingOptions>().BindConfiguration(EmbeddingOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
         services.AddOptions<SearchOptions>().BindConfiguration(SearchOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
+        services.AddOptions<ContextOptions>().BindConfiguration(ContextOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
 
         services.AddSingleton(_ => BuildDataSource(configuration));
         services.AddSingleton<SqlMigrationRunner>();
@@ -38,6 +40,20 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddSingleton<IChunkSearch, PostgresChunkSearch>();
         services.AddSingleton<ICorpusCatalog, ManifestCatalog>();
         services.AddSingleton<IDocumentTextSource, PdfPigTextSource>();
+        services.AddSingleton<IChunkContextCache, PostgresChunkContextCache>();
+
+        // Chunk contexts (spec 0005): its own client, so its timeout and retries are separate from the answer path's.
+        // The key comes from ANTHROPIC_API_KEY when the first call is made; with Context:Enabled=false none is made.
+        services.AddSingleton<IChunkContextGenerator>(provider =>
+        {
+            var context = provider.GetRequiredService<IOptions<ContextOptions>>();
+            var client = new AnthropicClient
+            {
+                Timeout = TimeSpan.FromSeconds(context.Value.RequestTimeoutSeconds),
+                MaxRetries = context.Value.MaxRetries,
+            };
+            return new AnthropicChunkContextGenerator(client.AsIChatClient(context.Value.Model, context.Value.MaxOutputTokens), context);
+        });
 
         // Retry with backoff, timeouts and a circuit breaker around every Ollama call (R1.20).
         var ollama = configuration.GetSection(OllamaOptions.SectionName).Get<OllamaOptions>() ?? new OllamaOptions();

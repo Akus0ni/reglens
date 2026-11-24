@@ -19,9 +19,12 @@ public sealed class AnswerOptions
     [Range(1024, 64000)]
     public int MaxOutputTokens { get; set; } = 8192;
 
-    /// <summary>Below this best similarity, abstain without calling the model (D33). 0.60 from the golden set (spec 0004, D48).</summary>
+    /// <summary>
+    /// Below this best similarity, abstain without calling the model (D33). From the golden set with the D48 rule:
+    /// 0.60 in spec 0004, 0.63 after contextual retrieval (spec 0005, R5.16; lowest answerable 0.657, n = 19).
+    /// </summary>
     [Range(0.0, 1.0)]
-    public double SimilarityFloor { get; set; } = 0.60;
+    public double SimilarityFloor { get; set; } = 0.63;
 
     [Range(1, 24 * 30)]
     public int CacheHours { get; set; } = 24;

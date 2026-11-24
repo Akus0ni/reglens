@@ -15,6 +15,7 @@ public static class ApplicationServiceCollectionExtensions
     public static IServiceCollection AddRegLensApplication(this IServiceCollection services)
     {
         services.AddSingleton(_ => DocumentChunker.CreateDefault());
+        services.AddSingleton<ChunkContextualizer>();
         services.AddSingleton<ChunkEmbedder>();
         services.AddTransient<IngestCorpus>();
         services.AddTransient<SearchRegulations>();

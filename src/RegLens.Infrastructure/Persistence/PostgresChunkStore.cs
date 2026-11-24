@@ -8,33 +8,39 @@ namespace RegLens.Infrastructure.Persistence;
 /// <summary>
 /// Stores documents and chunks in Postgres with pgvector (spec 0001, R1.21–R1.22).
 /// A document is replaced in one transaction, so a failure or Ctrl+C leaves the previous version intact (R1.25).
+/// The document row records the pipeline that built its chunks (spec 0005, P6).
 /// </summary>
 public sealed class PostgresChunkStore(NpgsqlDataSource dataSource) : IChunkStore
 {
-    public async Task<StoredDocumentState> GetStateAsync(SourceDocument document, CancellationToken cancellationToken)
+    public async Task<StoredDocumentState> GetStateAsync(SourceDocument document, string pipeline, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(document);
+        ArgumentNullException.ThrowIfNull(pipeline);
 
-        await using var command = dataSource.CreateCommand("SELECT sha256 FROM documents WHERE id = $1");
+        await using var command = dataSource.CreateCommand("SELECT sha256, pipeline FROM documents WHERE id = $1");
         command.Parameters.AddWithValue(document.Id);
-        return await command.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false) switch
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+        if (!await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
         {
-            string stored when string.Equals(stored, document.Sha256, StringComparison.OrdinalIgnoreCase) => StoredDocumentState.Current,
-            string => StoredDocumentState.Outdated,
-            _ => StoredDocumentState.Missing,
-        };
+            return StoredDocumentState.Missing;
+        }
+
+        var sameFile = string.Equals(reader.GetString(0), document.Sha256, StringComparison.OrdinalIgnoreCase);
+        var samePipeline = string.Equals(reader.GetString(1), pipeline, StringComparison.Ordinal);
+        return sameFile && samePipeline ? StoredDocumentState.Current : StoredDocumentState.Outdated;
     }
 
     public async Task ReplaceDocumentAsync(
-        SourceDocument document, IReadOnlyList<EmbeddedChunk> chunks, CancellationToken cancellationToken)
+        SourceDocument document, string pipeline, IReadOnlyList<EmbeddedChunk> chunks, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(document);
+        ArgumentNullException.ThrowIfNull(pipeline);
         ArgumentNullException.ThrowIfNull(chunks);
 
         await using var connection = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
         await using var transaction = await connection.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
 
-        await UpsertDocumentAsync(connection, transaction, document, cancellationToken).ConfigureAwait(false);
+        await UpsertDocumentAsync(connection, transaction, document, pipeline, cancellationToken).ConfigureAwait(false);
         await DeleteChunksAsync(connection, transaction, document.Id, cancellationToken).ConfigureAwait(false);
         await InsertChunksAsync(connection, transaction, chunks, cancellationToken).ConfigureAwait(false);
 
@@ -42,14 +48,19 @@ public sealed class PostgresChunkStore(NpgsqlDataSource dataSource) : IChunkStor
     }
 
     private static async Task UpsertDocumentAsync(
-        NpgsqlConnection connection, NpgsqlTransaction transaction, SourceDocument document, CancellationToken cancellationToken)
+        NpgsqlConnection connection,
+        NpgsqlTransaction transaction,
+        SourceDocument document,
+        string pipeline,
+        CancellationToken cancellationToken)
     {
         await using var command = new NpgsqlCommand("""
-            INSERT INTO documents (id, title, reference, version, source_url, sha256, ingested_at)
-            VALUES ($1, $2, $3, $4, $5, $6, now())
+            INSERT INTO documents (id, title, reference, version, source_url, sha256, pipeline, ingested_at)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, now())
             ON CONFLICT (id) DO UPDATE SET
                 title = EXCLUDED.title, reference = EXCLUDED.reference, version = EXCLUDED.version,
-                source_url = EXCLUDED.source_url, sha256 = EXCLUDED.sha256, ingested_at = EXCLUDED.ingested_at
+                source_url = EXCLUDED.source_url, sha256 = EXCLUDED.sha256, pipeline = EXCLUDED.pipeline,
+                ingested_at = EXCLUDED.ingested_at
             """, connection, transaction);
         command.Parameters.AddWithValue(document.Id);
         command.Parameters.AddWithValue(document.Title);
@@ -57,6 +68,7 @@ public sealed class PostgresChunkStore(NpgsqlDataSource dataSource) : IChunkStor
         command.Parameters.AddWithValue(document.Version);
         command.Parameters.AddWithValue(document.SourceUrl);
         command.Parameters.AddWithValue(document.Sha256);
+        command.Parameters.AddWithValue(pipeline);
         await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
     }
 
@@ -77,11 +89,12 @@ public sealed class PostgresChunkStore(NpgsqlDataSource dataSource) : IChunkStor
         }
 
         await using var batch = new NpgsqlBatch(connection, transaction);
-        foreach (var (chunk, vector) in chunks)
+        foreach (var (chunk, vector, context) in chunks)
         {
             var command = new NpgsqlBatchCommand("""
-                INSERT INTO chunks (document_id, para_ref, heading, page_start, page_end, content, content_hash, token_estimate, embedding)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                INSERT INTO chunks
+                    (document_id, para_ref, heading, page_start, page_end, content, content_hash, token_estimate, embedding, context)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
                 ON CONFLICT (content_hash) DO NOTHING
                 """);
             command.Parameters.AddWithValue(chunk.DocumentId);
@@ -93,6 +106,7 @@ public sealed class PostgresChunkStore(NpgsqlDataSource dataSource) : IChunkStor
             command.Parameters.AddWithValue(chunk.Hash.Value);
             command.Parameters.AddWithValue(chunk.TokenEstimate);
             command.Parameters.AddWithValue(new Vector(vector));
+            command.Parameters.Add(new NpgsqlParameter<string?> { TypedValue = context, NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Text });
             batch.BatchCommands.Add(command);
         }
 

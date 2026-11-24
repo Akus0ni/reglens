@@ -19,8 +19,18 @@ public sealed record EvalConfiguration(string Name, SearchMode Mode, KeywordScor
         ?? throw new ArgumentException($"Unknown configuration '{name}'. Use one of: {string.Join(", ", All.Select(c => c.Name))}.");
 }
 
-/// <summary>What every run records about where its numbers came from (P10).</summary>
-public sealed record RunInfo(string Kind, string Config, DateTimeOffset StartedUtc, string Commit, string EmbeddingModel, string GoldenSetVersion);
+/// <summary>
+/// What every run records about where its numbers came from (spec 0004, P10). <paramref name="Pipeline"/> is how the
+/// index was built (spec 0005, R5.15); null in runs saved before it was recorded.
+/// </summary>
+public sealed record RunInfo(
+    string Kind,
+    string Config,
+    DateTimeOffset StartedUtc,
+    string Commit,
+    string EmbeddingModel,
+    string GoldenSetVersion,
+    string? Pipeline = null);
 
 public sealed record RetrievalQuestion(
     string Id,
@@ -84,13 +94,9 @@ public sealed record AnswerRun(
 
 public sealed record ProbeRun(RunInfo Info, string Question, bool Passed, bool CanaryCited, bool Abstained, string Answer, double CostUsd);
 
-/// <summary>List prices per million tokens (Claude pricing page, checked 2026-11-23).</summary>
+/// <summary>List prices; the table lives in Application so ingestion can price context generation (spec 0005, P10).</summary>
 public static class Pricing
 {
-    public static double Cost(string model, long inputTokens, long outputTokens) => model switch
-    {
-        "claude-sonnet-5-5" => ((inputTokens * 2.0) + (outputTokens * 10.0)) / 1_000_000,
-        "claude-haiku-4-5" => ((inputTokens * 1.0) + (outputTokens * 5.0)) / 1_000_000,
-        _ => throw new ArgumentException($"No price recorded for {model}."),
-    };
+    public static double Cost(string model, long inputTokens, long outputTokens) =>
+        RegLens.Application.ModelPricing.Cost(model, inputTokens, outputTokens);
 }

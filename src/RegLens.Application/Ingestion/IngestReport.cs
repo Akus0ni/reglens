@@ -32,12 +32,15 @@ public sealed record DocumentIngestResult(
     int PagesRead,
     int ChunksWritten,
     TokenStats Tokens,
-    TimeSpan Elapsed);
+    TimeSpan Elapsed,
+    ContextStats Context);
 
 /// <summary>What happened to the whole run.</summary>
 public sealed record IngestReport(IReadOnlyList<DocumentIngestResult> Documents, TimeSpan Elapsed)
 {
     public int TotalChunksWritten => Documents.Sum(d => d.ChunksWritten);
+
+    public double TotalContextCostUsd => Documents.Sum(d => d.Context.CostUsd);
 }
 
 /// <summary>Options for one run (spec 0001, R1.23).</summary>

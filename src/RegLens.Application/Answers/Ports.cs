@@ -1,11 +1,15 @@
 namespace RegLens.Application.Answers;
 
-/// <summary>A chunk's full text and where it comes from (spec 0003, R3.2).</summary>
+/// <summary>
+/// A chunk's full text and where it comes from (spec 0003, R3.2), with its heading path (spec 0005, P11). The generated
+/// context is not part of it: it serves retrieval only and never reaches the answer model (D52).
+/// </summary>
 public sealed record StoredPassage(
     long ChunkId,
     string DocumentId,
     string DocumentTitle,
     string ParaRef,
+    string Heading,
     int PageStart,
     int PageEnd,
     string Content);
