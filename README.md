@@ -4,6 +4,9 @@ RegLens answers questions about Indian NBFC regulation with **citations that are
 source**. When the regulations don't answer a question, it says what is missing instead of guessing. It measures its own
 retrieval and answer quality, and it exposes itself as an **MCP server** so agents can use it as a tool.
 
+**Agent built on it:** [reglens-agent](https://github.com/Akus0ni/reglens-agent), a LangGraph compliance-review agent that
+uses RegLens over MCP, with human approval and CI-gated trajectory evals.
+
 .NET 10 · ASP.NET Core minimal APIs · Postgres 17 + pgvector · Ollama `nomic-embed-text` · Claude (`claude-sonnet-5-5`
 answers, `claude-haiku-5-5` chunk context, `claude-haiku-4-5` eval judge) · MCP C# SDK · OpenTelemetry
 
@@ -183,6 +186,14 @@ header. `scripts/mcp-check.cs` is a minimal .NET client (`dotnet run scripts/mcp
 - **Local only.** One shared API key, no OAuth, bound to 127.0.0.1, run and tested on Windows. Traces include prompt
   and answer text by default (`Telemetry:CaptureContent`).
 - **Cold start.** The first embedding after Ollama unloads the model takes about 30 s.
+
+## Design records
+
+- [ADR 0001](docs/adr/0001-hybrid-search.md): hybrid search with RRF as the default, and why dense-only isn't, yet
+- [ADR 0002](docs/adr/0002-mcp-boundary.md): MCP as the boundary between RegLens and its agents
+- [ADR 0003](docs/adr/0003-citation-verification.md): citations verified in code, never by a model
+- [Scaling RegLens](docs/scale-up.md): a one-page design for tens of thousands of documents and 50 questions a second,
+  with a cost model from measured token counts
 
 ## How it was built
 

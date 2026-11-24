@@ -2,6 +2,12 @@
 
 Newest first. What was done, why, and the problems hit.
 
+## 2026-11-24 — Portfolio pass: ADRs and the scale-up design
+
+- Three ADRs (hybrid search, the MCP boundary, citation verification) and a one-page scale-up design with a cost model
+  from measured numbers: $0.0122 per model-calling answer (3,896 tokens in, 444 out, n = 29), $0.00054 per chunk
+  context, $0.045 per agent review. The README links them and the agent repo.
+
 ## 2026-11-24 — Fix: MCP results now match their output schema
 
 - The Day 2 agent's first live run failed on its first tool call: the Python MCP client validates `structuredContent`
