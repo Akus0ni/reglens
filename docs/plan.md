@@ -71,6 +71,13 @@ product features for compliance.
 | D53 | Contextual retrieval replaces the index in place and is compared with spec 0004's saved runs; a setting rebuilds without context (spec 0005) | Owner | 2026-11-24 |
 | D54 | A context-generation failure fails the document (old chunks stay); generated contexts are cached so a re-run resumes (spec 0005) | Owner | 2026-11-24 |
 | D55 | Spend cap for spec 0005's paid runs: $2 | Owner | 2026-11-24 |
+| D58 | API key (resolves Q3): one key from `Auth:ApiKey` (env var `Auth__ApiKey` or user-secrets, never appsettings), sent as `X-API-Key`, compared in constant time; health endpoints open; rotate by changing it and restarting (spec 0006) | Owner | 2026-11-24 |
+| D59 | Rate limits per caller, fixed one-minute windows: ask bucket 5 (`/ask`, `ask_regulations`), read bucket 30 (`/search`, `/passages`, `search_regulations`, `get_passage`); shared by REST and MCP (spec 0006) | Owner | 2026-11-24 |
+| D60 | The API connects as `reglens_api`, a login in the NOLOGIN role `reglens_readonly` (SELECT only) created by migration 005; the login and its password come from `scripts/create-api-db-user.ps1` and an env var (spec 0006) | Owner | 2026-11-24 |
+| D61 | Readiness: Postgres or the Ollama embedding model unreachable = Unhealthy; Redis unreachable = Degraded; Anthropic not probed (spec 0006) | Owner | 2026-11-24 |
+| D62 | API and Ingest export OpenTelemetry to the Aspire dashboard, with prompt and answer text in spans (`Telemetry:CaptureContent`, default on) (spec 0006) | Owner | 2026-11-24 |
+| D63 | `GET /passages/{id}` gives REST the same three operations as MCP (spec 0006) | Owner | 2026-11-24 |
+| D64 | Spend cap for spec 0006's paid checks: $0.50 | Owner | 2026-11-24 |
 | D56 | hybrid-bm25 stays the default after spec 0005, although dense scored higher (recall@5 0.95 vs 0.90, MRR@10 0.931 vs 0.907, n = 20): the gap is one question, and the keyword side keeps exact-term queries (paragraph numbers, G.S.R. numbers). Revisit with a larger golden set. Confirms D49 | Owner | 2026-11-24 |
 | D57 | Generated contexts that invent structure (2 of 512: DPDP Rules 7 and 14 placed in chapters the Rules do not have) are accepted as a known limitation; no prompt change for observed errors (spec 0005 §10, A5) | Owner | 2026-11-24 |
 
@@ -79,7 +86,6 @@ product features for compliance.
 | # | Question | Blocks |
 |---|----------|--------|
 | Q1 | Add the DPDP Act 2023 to the corpus? (plan says "if time allows") | Golden-set questions on consent |
-| Q3 | How is the API key provisioned and checked (user-secrets, header name, rotation)? | Spec 0006 |
 | Q4 | Name and visibility of the Day 2 agent repo | Day 2 |
 | Q5 | Langfuse Cloud (Hobby) or self-hosted for agent traces | Day 2 tracing |
 | Q6 | Set `OLLAMA_KEEP_ALIVE` (e.g. `24h`) on the owner's machine so the embedding model stays loaded between searches? | Nothing (cold searches wait ~30 s) |
