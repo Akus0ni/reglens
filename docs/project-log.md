@@ -2,6 +2,13 @@
 
 Newest first. What was done, why, and the problems hit.
 
+## 2026-11-24 — Day 1 shipped: README
+
+- `README.md`: problem, corpus, architecture diagram, results with n and dates, Windows quickstart, MCP and traces,
+  production basics, known limitations, and the spec index. The sprint's "Ship Day 1" step had been missed.
+- Day 2 decisions recorded: public repo `reglens-agent` (D65), OpenTelemetry to Aspire instead of Langfuse (D66), the
+  same spec-first workflow (D67), $3 cap (D68).
+
 ## 2026-11-24 — Spec 0006: MCP server, tracing and production basics built
 
 - `/mcp` (MCP C# SDK 2.4.0, stateless) with `search_regulations`, `get_passage` and `ask_regulations`, plus

@@ -80,14 +80,16 @@ product features for compliance.
 | D62 | API and Ingest export OpenTelemetry to the Aspire dashboard, with prompt and answer text in spans (`Telemetry:CaptureContent`, default on) (spec 0006) | Owner | 2026-11-24 |
 | D63 | `GET /passages/{id}` gives REST the same three operations as MCP (spec 0006) | Owner | 2026-11-24 |
 | D64 | Spend cap for spec 0006's paid checks: $0.50 | Owner | 2026-11-24 |
+| D65 | The Day 2 agent lives in a public repo `Akus0ni/reglens-agent` (resolves Q4) | Owner | 2026-11-24 |
+| D66 | Agent traces go over OpenTelemetry to the same Aspire dashboard as RegLens, not Langfuse, so one trace can span agent → MCP → RegLens (resolves Q5; changes the sprint plan's Langfuse step) | Owner | 2026-11-24 |
+| D67 | `reglens-agent` uses the same workflow as this repo: spec PR → code PR, protected `main`, the guard hook, a project log | Owner | 2026-11-24 |
+| D68 | Spend cap for Day 2's paid runs (agent development and live evals): $3 | Owner | 2026-11-24 |
 
 ## 3. Open questions
 
 | # | Question | Blocks |
 |---|----------|--------|
 | Q1 | Add the DPDP Act 2023 to the corpus? (plan says "if time allows") | Golden-set questions on consent |
-| Q4 | Name and visibility of the Day 2 agent repo | Day 2 |
-| Q5 | Langfuse Cloud (Hobby) or self-hosted for agent traces | Day 2 tracing |
 | Q6 | Set `OLLAMA_KEEP_ALIVE` (e.g. `24h`) on the owner's machine so the embedding model stays loaded between searches? | Nothing (cold searches wait ~30 s) |
 
 ## 4. Specs (proposed order)
