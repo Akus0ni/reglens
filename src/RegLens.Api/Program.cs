@@ -1,6 +1,9 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using ModelContextProtocol;
 using ModelContextProtocol.AspNetCore;
 using ModelContextProtocol.Protocol;
 using OpenTelemetry;
@@ -54,7 +57,12 @@ builder.Services.AddMcpServer()
                 Content = [new TextContentBlock { Text = $"Rate limit exceeded. Retry after {decision.RetryAfterSeconds} s." }],
             };
     }))
-    .WithTools<RegulationTools>();
+    // The SDK drops null properties by default (WhenWritingNull) although the generated output schema lists them as
+    // required; clients that validate structuredContent (the Python MCP SDK does) then reject the result. Keep nulls.
+    .WithTools<RegulationTools>(new JsonSerializerOptions(McpJsonUtilities.DefaultOptions)
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.Never,
+    });
 
 builder.Services.AddRegLensTelemetry(builder.Configuration, "reglens-api")
     .WithTracing(tracing => tracing.AddAspNetCoreInstrumentation())
