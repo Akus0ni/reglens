@@ -7,6 +7,7 @@ using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RegLens.Application.Search;
+using RegLens.Application.Telemetry;
 using RegLens.Domain.Answers;
 
 namespace RegLens.Application.Answers;
@@ -34,6 +35,7 @@ public sealed partial class AnswerQuestion(
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(question);
 
+        using var activity = RegLensActivities.Source.StartActivity("answer");
         var started = Stopwatch.GetTimestamp();
         var key = CacheKey(question, topK, await indexVersion.GetAsync(cancellationToken).ConfigureAwait(false));
         var entry = new HybridCacheEntryOptions
@@ -53,6 +55,10 @@ public sealed partial class AnswerQuestion(
                 async ct =>
                 {
                     produced = true;
+                    // HybridCache runs the factory without the caller's ExecutionContext, so the parent is passed in
+                    // explicitly: otherwise the embedding, SQL and model spans become separate traces (spec 0006, A4).
+                    using var generate = RegLensActivities.Source.StartActivity(
+                        "answer generate", ActivityKind.Internal, activity?.Context ?? default);
                     var fresh = await ProduceAsync(question, topK, ct).ConfigureAwait(false);
                     // HybridCache never stores a failed factory, which is how P9's cases stay out of the cache.
                     return IsCacheable(fresh) ? fresh : throw new UncacheableAnswerException(fresh);
@@ -70,6 +76,9 @@ public sealed partial class AnswerQuestion(
         {
             result = result with { Cached = true, Usage = null };
         }
+
+        activity?.SetTag("reglens.answer.cached", result.Cached);
+        activity?.SetTag("reglens.answer.abstained", result.Abstained);
 
         var elapsedMs = (long)Stopwatch.GetElapsedTime(started).TotalMilliseconds;
         LogAnswered(result.Cached, result.Abstained, result.AbstainReason ?? "none", result.Citations.Count,
