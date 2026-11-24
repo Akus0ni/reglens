@@ -1,6 +1,6 @@
 # Spec 0006 — MCP server, tracing and production basics
 
-> Status: **Draft** · Created: 2026-11-24 · Owner: @Akus0ni
+> Status: **Approved (PR #18, 2026-11-24) · Implemented in `feat/0006-mcp-production`** · Created: 2026-11-24 · Owner: @Akus0ni
 > Depends on: specs 0001–0005 · Blocked by open questions: none (Q3 answered: D58)
 > Sprint phase: D1·6
 
@@ -225,7 +225,29 @@ None for retrieval or answers (nothing that affects them changes). The PR report
 |---|----------|--------|
 | — | None | — |
 
-## 9. Sources (checked 2026-11-24)
+## 9. Changes made while building
+
+| Where | Change | Why |
+|-------|--------|-----|
+| A4, P6 | `AnswerQuestion` opens an `answer` span and passes its context explicitly to a child `answer generate` span inside the HybridCache factory | HybridCache runs the factory without the caller's ExecutionContext: the first live trace showed the embedding, SQL and `chat claude-sonnet-5-5` spans as separate root traces, not under `POST /ask` or `POST /mcp` |
+| A4 | `SqlMigrationRunner` opens a `migrate` span; `IngestCorpus` opens `ingest` and one span per document; the Ingest host now starts and stops its host | OpenTelemetry's providers start in a hosted service, and the Ingest host never started; the migration queries were otherwise loose root spans |
+| A5, `CLAUDE.md` | Connection strings use `Host=127.0.0.1`, not `localhost` | With `localhost`, Npgsql tries `::1` first; the container listens on 127.0.0.1 only, and on Windows the refused IPv6 attempt took about 2 s. That is the readiness check's whole 2 s budget, so `/health/ready` reported Postgres down although it was up (measured: 2.0 s per check → 5 ms) |
+| P3 | `AuthOptions` validates `Auth:ApiKey` with `[Required]` and `[MinLength(32)]` and `ValidateOnStart`; an authorization fallback policy protects every endpoint that does not say `AllowAnonymous` | Fail closed: a new endpoint is protected by default |
+| P2 | The SDK prefixes a tool error with "An error occurred invoking '<tool>': " before the `McpException` message, and leaves null properties out of structured content (REST returns them as `null`) | Observed with the SDK's client; no change needed |
+| P4 | `Retry-After` is the full window (60 s) rather than the time left in it: `FixedWindowRateLimiter` reports its window as the `RetryAfter` metadata | It never tells a caller to retry too early |
+| A2 | `scripts/mcp-check.cs` (a .NET 10 file-based app) lists and calls the tools as the Day 2 agent will, with the key from `REGLENS_API_KEY`. `ModelContextProtocol` 2.4.0 is in `Directory.Packages.props` for it | The MCP Inspector was not needed |
+| R6.15 | `IOllamaApiClient` is registered (the concrete client once, two registrations) so the readiness check can list models; the embedding generator is wrapped with `UseOpenTelemetry` | The health check needs the client, the trace needs the wrapper |
+
+## 10. Results (2026-11-24)
+
+- **A1:** `dotnet build`: 0 warnings. `dotnet test`: **285 passed** (was 235). New: API key (accepted; 401 on `/search`, `/passages`, `/ask`, `/mcp` without or with a wrong key; startup refused without a key or with a short one), `GET /passages/{id}` (200/404/400), health (Healthy, Degraded without Redis, 503 without Postgres or Ollama, live stays 200), rate limits (429 with `Retry-After` on the 3rd ask at a limit of 2; REST asks use up the MCP ask; `tools/list` not counted), MCP through the SDK's client in-process (three tools with annotations and output schemas for a `2025-11-25` and a `2026-07-28` client; structured results; tool errors for bad input; no key, no connection), the health checks themselves, and the read-only login (Testcontainers: reads all tables and the three BM25 views; INSERT, UPDATE, DELETE, TRUNCATE, REFRESH and CREATE TABLE refused with 42501; tables created later are readable; the migration runs in a second database after the role exists).
+- **A2:** against the real index, `scripts/mcp-check.cs` negotiated protocol `2026-07-28` and listed the three tools with their annotations and schemas. `search_regulations` "personal data breach intimation to the Board" ranked Rule 7 first (dense 1, keyword 1, similarity 0.776); `get_passage 1966` returned its full text; `get_passage 999999` was a tool error "No passage with id 999999."
+- **A3:** `ask_regulations` rbc-03 answered from the answer cache with three verified quotes, Para 100 (8:00 a.m.–7:00 p.m., not for microfinance) and Para 91 (microfinance, 9:00 a.m.–6:00 p.m.). out-01 (GST on gold jewellery) abstained (`model-abstained`): 3,552 in / 137 out.
+- **A4:** one `POST /ask` (uncached) in the Aspire dashboard, 3.49 s: `answer` → `answer generate` → `embeddings nomic-embed-text` 0.14 s (Ollama) → two `postgresql` 39 ms and 10 ms → `chat claude-sonnet-5-5` 2.84 s (Anthropic HTTP 2.58 s), with `gen_ai.usage.input_tokens` 4,398, `output_tokens` 271, and the prompt and answer text (D62). Ingest: a `migrate` trace (13 spans) and an `ingest` trace with one span per document.
+- **A5:** the API ran as `reglens_api` after `scripts/create-api-db-user.ps1` (`pg_stat_activity`). `/health/ready` Healthy; with Redis stopped, Degraded 200 and search still worked; Healthy again after Redis restarted. Six identical `POST /ask` within a minute: 200 ×5 (four from the cache), then 429 with `Retry-After: 60`. A `Host: evil.example` request got 400.
+- **A6, spend:** $0.0085 (out-01) + $0.0115 (the uncached `/ask`) = **about $0.02** of the $0.50 cap; every other answer came from the cache.
+
+## 11. Sources (checked 2026-11-24)
 
 - `ModelContextProtocol.AspNetCore` 2.4.0, released 2026-11-07: https://www.nuget.org/packages/ModelContextProtocol.AspNetCore/2.4.0.
   The SDK docs at tag `v2.4.0` (https://github.com/modelcontextprotocol/csharp-sdk/tree/v2.4.0/docs/concepts):
