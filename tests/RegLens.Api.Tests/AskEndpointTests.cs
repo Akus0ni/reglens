@@ -46,8 +46,7 @@ public sealed class AskEndpointTests : IDisposable
                 Usage = new UsageDetails { InputTokenCount = 1200, OutputTokenCount = 300 },
             });
 
-        _factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
-            builder.ConfigureTestServices(services =>
+        _factory = TestApi.Create(services =>
             {
                 services.RemoveAll<IChunkSearch>().AddSingleton(search);
                 services.RemoveAll<IEmbeddingGenerator<string, Embedding<float>>>().AddSingleton(generator);
@@ -55,7 +54,7 @@ public sealed class AskEndpointTests : IDisposable
                 services.RemoveAll<IIndexVersion>().AddSingleton(indexVersion);
                 services.RemoveAll<IChatClient>().AddSingleton(_chat);
                 services.RemoveAll<IDistributedCache>();
-            }));
+            });
     }
 
     public void Dispose() => _factory.Dispose();
@@ -137,7 +136,7 @@ public sealed class AskEndpointTests : IDisposable
 
     private async Task<HttpResponseMessage> Post(string body)
     {
-        using var client = _factory.CreateClient();
+        using var client = TestApi.Client(_factory);
         using var content = new StringContent(body, Encoding.UTF8, "application/json");
         return await client.PostAsync(new Uri("/ask", UriKind.Relative), content, TestContext.Current.CancellationToken);
     }

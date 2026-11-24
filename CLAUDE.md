@@ -6,8 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 RegLens is a .NET 10 API that answers questions about Indian NBFC regulation with verified citations and exposes
 itself as an MCP server. **Built so far: specs 0001 ingestion, 0002 hybrid retrieval** (`GET /search`), **0003
-answers** (`POST /ask`), **0004 evals** (golden set, BM25) **and 0005 contextual retrieval** (Haiku 5.5 chunk context,
-heading fixes). Next: spec 0006, MCP and production basics. Plan, decisions
+answers** (`POST /ask`), **0004 evals** (golden set, BM25), **0005 contextual retrieval** (Haiku 5.5 chunk context,
+heading fixes) **and 0006 MCP and production basics** (`/mcp`, API key, rate limits, health, tracing, read-only DB
+login). Next: Day 2, the Python agent (separate repo). Plan, decisions
 (D*n*) and open questions (Q*n*): `docs/plan.md`. Specs: `docs/specs/`. History: `docs/project-log.md`.
 
 ## Workflow — read first
@@ -27,7 +28,8 @@ heading fixes). Next: spec 0006, MCP and production basics. Plan, decisions
 ```powershell
 docker compose up -d                              # Postgres+pgvector (127.0.0.1:5432), Redis (127.0.0.1:6379), Aspire dashboard (http://localhost:18888)
 ollama pull nomic-embed-text                      # Ollama runs natively on http://localhost:11434
-dotnet user-secrets set "ConnectionStrings:RegLens" "Host=localhost;Port=5432;Database=reglens;Username=reglens;Password=reglens-dev" --project src/RegLens.Ingest
+dotnet user-secrets set "ConnectionStrings:RegLens" "Host=127.0.0.1;Port=5432;Database=reglens;Username=reglens;Password=reglens-dev" --project src/RegLens.Ingest
+                                                  # 127.0.0.1, not localhost: Windows spends ~2 s trying ::1 first
 
 dotnet build RegLens.slnx                         # must be 0 warnings (warnings are errors)
 dotnet test                                       # all tests; Docker must be running (Testcontainers)
@@ -43,10 +45,17 @@ dotnet run --project src/RegLens.Ingest -- --force --document dpdp-rules-2025
 $env:Context__Enabled='false'; dotnet run --project src/RegLens.Ingest   # rebuild without context: free, no API call
 dotnet run scripts/chunk-diff.cs -- diff before.json   # re-chunk the PDFs and diff against an export of stored chunks
 
-dotnet user-secrets set "ConnectionStrings:RegLens" "<same as above>" --project src/RegLens.Api
-dotnet run --project src/RegLens.Api              # http://127.0.0.1:5180 (5080 is the owner's AgencyOS)
-curl "http://127.0.0.1:5180/search?q=Rule%207&topK=5"
-curl -X POST http://127.0.0.1:5180/ask -H "Content-Type: application/json" -d '{"question":"When must a breach be reported to the Board?"}'
+$env:REGLENS_API_DB_PASSWORD='<choose one>'; ./scripts/create-api-db-user.ps1   # SELECT-only login reglens_api (D60);
+                                                  # run after the ingest host has applied migration 005
+dotnet user-secrets set "ConnectionStrings:RegLens" "Host=127.0.0.1;Port=5432;Database=reglens;Username=reglens_api;Password=<it>" --project src/RegLens.Api
+dotnet user-secrets set "Auth:ApiKey" "<32+ random characters>" --project src/RegLens.Api   # or env var Auth__ApiKey; never appsettings
+dotnet run --project src/RegLens.Api              # http://127.0.0.1:5180 (5080 is the owner's AgencyOS); refuses to start without a key
+curl http://127.0.0.1:5180/health/ready           # no key needed: Healthy / Degraded (Redis down) / 503 Unhealthy
+curl -H "X-API-Key: $KEY" "http://127.0.0.1:5180/search?q=Rule%207&topK=5"
+curl -H "X-API-Key: $KEY" http://127.0.0.1:5180/passages/1966
+curl -X POST http://127.0.0.1:5180/ask -H "X-API-Key: $KEY" -H "Content-Type: application/json" -d '{"question":"When must a breach be reported to the Board?"}'
+$env:REGLENS_API_KEY='<the key>'; dotnet run scripts/mcp-check.cs -- list   # MCP client: list | search <q> | passage <id> | ask <q>
+                                                  # traces: Aspire dashboard http://localhost:18888 (login URL in `docker logs reglens-aspire-dashboard-1`)
 
 dotnet run --project src/RegLens.Evals -- retrieval --config hybrid-bm25     # free: recall@5/@8, MRR@10 (n = 20)
 dotnet run --project src/RegLens.Evals -- floor --config hybrid-bm25         # D48 floor from the latest retrieval run
@@ -110,7 +119,20 @@ PdfPig, OllamaSharp, Anthropic SDK, HybridCache + Redis, manifest) ← hosts `Re
   or abstention (`low-similarity`, `model-abstained`, `unverified`, `model-refused`). Refusals and degraded answers
   are not cached. `AnthropicFailureTranslation` maps SDK outages to 503; truncated or unparsable output is 502.
   `GET /search` and the MCP `search_regulations` tool stop after retrieval and never call Anthropic.
-- **MCP** (planned, `/mcp`): read-only tools over the same services, consumed by the Day 2 Python agent (separate repo).
+- **MCP** (built, spec 0006, `/mcp`): `ModelContextProtocol.AspNetCore` 2.4.0, stateless Streamable HTTP (serves
+  `2026-07-28` clients and `initialize` clients). `RegulationTools` (API) adapts the same use cases and
+  `RequestValidation` as REST: `search_regulations`, `get_passage` (= `GET /passages/{id}`), `ask_regulations`, all
+  read-only with structured output; bad input or failures are `McpException` → tool error. Consumed by the Day 2
+  Python agent (separate repo), which sends `X-API-Key` through `create_mcp_http_client(headers=…)`.
+- **Production basics** (built, spec 0006): `X-API-Key` checked in constant time against `Auth:ApiKey`; an
+  authorization fallback policy protects every endpoint except `/health/*`. `RateLimitBuckets` holds one fixed
+  one-minute window per caller for ask (5) and read (30), shared by REST (endpoint filter → 429 + `Retry-After`) and
+  MCP (call-tool filter → tool error). `/health/live`; `/health/ready` checks Postgres and the Ollama model
+  (Unhealthy) and Redis (Degraded). `AllowedHosts` is loopback only. OpenTelemetry (`AddRegLensTelemetry`) in both
+  hosts → Aspire dashboard over OTLP gRPC, with ASP.NET Core, HttpClient, Npgsql, M.E.AI GenAI (prompt and answer text
+  included, `Telemetry:CaptureContent`, D62) and MCP sources; `AnswerQuestion` passes its span context into the
+  HybridCache factory, which does not flow it. The API connects as `reglens_api` (role `reglens_readonly`, migration
+  005): SELECT only.
 - **Evals** (built, spec 0004): `evals/golden-set.json` (owner-reviewed) → `src/RegLens.Evals` (third composition
   root; never in `dotnet test`; paid commands need `--confirm-spend`; no Redis, so every answer is really asked) →
   raw runs in `evals/runs/`, generated `evals/results.md`, `evals/judge-check.md` for the owner. The Haiku judge

@@ -2,6 +2,22 @@
 
 Newest first. What was done, why, and the problems hit.
 
+## 2026-11-24 — Spec 0006: MCP server, tracing and production basics built
+
+- `/mcp` (MCP C# SDK 2.4.0, stateless) with `search_regulations`, `get_passage` and `ask_regulations`, plus
+  `GET /passages/{id}`. The SDK's own client, in tests and from `scripts/mcp-check.cs`, connects with protocol
+  `2026-07-28` and with `2025-11-25`.
+- API key (`X-API-Key`, fail closed), rate limits shared by REST and MCP (ask 5/min, read 30/min), `/health/live` and
+  `/health/ready`, loopback-only `AllowedHosts`, OpenTelemetry from API and Ingest to the Aspire dashboard, and a
+  SELECT-only `reglens_api` login (migration 005 + `scripts/create-api-db-user.ps1`).
+- One `/ask` traced end to end: 3.49 s, of which Sonnet 2.84 s, embedding 0.14 s, SQL about 50 ms.
+- Problems hit: HybridCache runs its factory without the caller's ExecutionContext, so answer spans became separate
+  traces until the parent was passed in; `Host=localhost` cost about 2 s per new Postgres connection on Windows (IPv6
+  first), which failed the 2 s readiness check, so connection strings now use 127.0.0.1; the Ingest host never
+  started, so OpenTelemetry never ran there; PowerShell 5.1 has no `RandomNumberGenerator.Fill` (the first generated
+  password was all zero bytes; regenerated with `GetBytes`).
+- Spend: about $0.02 of the $0.50 cap. Tests: 285.
+
 ## 2026-11-24 — Spec 0005 follow-ups
 
 - A5: checked every chunk context that names a chapter. Two DPDP contexts (Rules 7 and 14) invent chapters; the corrigendum

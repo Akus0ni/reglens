@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using RegLens.Application.Telemetry;
 using RegLens.Domain.Chunking;
 using RegLens.Domain.Corpus;
 
@@ -38,6 +39,7 @@ public sealed partial class IngestCorpus(
     public async Task<IngestReport> RunAsync(IngestRequest request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
+        using var activity = RegLensActivities.Source.StartActivity("ingest");
         var started = Stopwatch.GetTimestamp();
 
         var documents = Select(await catalog.LoadAsync(cancellationToken).ConfigureAwait(false), request.OnlyDocumentId);
@@ -85,8 +87,10 @@ public sealed partial class IngestCorpus(
 
     private async Task<DocumentIngestResult> IngestAsync(SourceDocument document, bool force, CancellationToken cancellationToken)
     {
+        using var activity = RegLensActivities.Source.StartActivity("ingest " + document.Id);
         var started = Stopwatch.GetTimestamp();
         var pipeline = Pipeline(_context);
+        activity?.SetTag("reglens.pipeline", pipeline);
         var state = await store.GetStateAsync(document, pipeline, cancellationToken).ConfigureAwait(false);
         if (state == StoredDocumentState.Current && !force)
         {

@@ -29,12 +29,11 @@ public sealed class SearchEndpointTests : IDisposable
         _search.FindByCitationsAsync(Arg.Any<IReadOnlyList<Citation>>(), Arg.Any<SearchQuery>(), Arg.Any<CancellationToken>())
             .Returns([]);
 
-        _factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
-            builder.ConfigureTestServices(services =>
+        _factory = TestApi.Create(services =>
             {
                 services.RemoveAll<IChunkSearch>().AddSingleton(_search);
                 services.RemoveAll<IEmbeddingGenerator<string, Embedding<float>>>().AddSingleton(generator);
-            }));
+            });
     }
 
     [Fact]
@@ -88,7 +87,7 @@ public sealed class SearchEndpointTests : IDisposable
 
     private async Task<HttpResponseMessage> Get(string url)
     {
-        using var client = _factory.CreateClient();
+        using var client = TestApi.Client(_factory);
         return await client.GetAsync(new Uri(url, UriKind.Relative), TestContext.Current.CancellationToken);
     }
 }

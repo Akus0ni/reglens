@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
 using Npgsql;
+using RegLens.Application.Telemetry;
 
 namespace RegLens.Infrastructure.Persistence;
 
@@ -19,6 +20,7 @@ public sealed partial class SqlMigrationRunner(NpgsqlDataSource dataSource, ILog
     /// <summary>Applies pending migrations and returns how many were applied.</summary>
     public async Task<int> ApplyAsync(CancellationToken cancellationToken)
     {
+        using var activity = RegLensActivities.Source.StartActivity("migrate");
         await using var connection = await dataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
         await ExecuteAsync(connection, null, """
             CREATE TABLE IF NOT EXISTS schema_version (

@@ -13,6 +13,7 @@ using RegLens.Infrastructure.Context;
 using RegLens.Infrastructure.Corpus;
 using RegLens.Infrastructure.Embeddings;
 using RegLens.Infrastructure.Persistence;
+using RegLens.Infrastructure.Telemetry;
 
 namespace RegLens.Infrastructure;
 
@@ -33,6 +34,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddOptions<EmbeddingOptions>().BindConfiguration(EmbeddingOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
         services.AddOptions<SearchOptions>().BindConfiguration(SearchOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
         services.AddOptions<ContextOptions>().BindConfiguration(ContextOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
+        services.AddOptions<TelemetryOptions>().BindConfiguration(TelemetryOptions.SectionName);
 
         services.AddSingleton(_ => BuildDataSource(configuration));
         services.AddSingleton<SqlMigrationRunner>();
@@ -52,7 +54,8 @@ public static class InfrastructureServiceCollectionExtensions
                 Timeout = TimeSpan.FromSeconds(context.Value.RequestTimeoutSeconds),
                 MaxRetries = context.Value.MaxRetries,
             };
-            return new AnthropicChunkContextGenerator(client.AsIChatClient(context.Value.Model, context.Value.MaxOutputTokens), context);
+            var chat = WithTelemetry(client.AsIChatClient(context.Value.Model, context.Value.MaxOutputTokens), provider);
+            return new AnthropicChunkContextGenerator(chat, context);
         });
 
         // Retry with backoff, timeouts and a circuit breaker around every Ollama call (R1.20).
@@ -69,9 +72,14 @@ public static class InfrastructureServiceCollectionExtensions
                 // The circuit breaker must sample at least twice the attempt timeout.
                 resilience.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(ollama.AttemptTimeoutSeconds * 2);
             });
-        services.AddSingleton<IEmbeddingGenerator<string, Embedding<float>>>(provider => new OllamaApiClient(
+        services.AddSingleton(provider => new OllamaApiClient(
             provider.GetRequiredService<IHttpClientFactory>().CreateClient(OllamaHttpClientName),
             provider.GetRequiredService<IOptions<OllamaOptions>>().Value.EmbeddingModel));
+        services.AddSingleton<IOllamaApiClient>(provider => provider.GetRequiredService<OllamaApiClient>());
+        services.AddSingleton(provider =>
+            new EmbeddingGeneratorBuilder<string, Embedding<float>>(provider.GetRequiredService<OllamaApiClient>())
+                .UseOpenTelemetry(configure: generator => generator.EnableSensitiveData = CaptureContent(provider))
+                .Build(provider));
 
         return services;
     }
@@ -101,8 +109,8 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddSingleton<IChatClient>(provider =>
         {
             var answers = provider.GetRequiredService<IOptions<AnswerOptions>>().Value;
-            return new AnthropicFailureTranslation(
-                provider.GetRequiredService<AnthropicClient>().AsIChatClient(answers.Model, answers.MaxOutputTokens));
+            return new AnthropicFailureTranslation(WithTelemetry(
+                provider.GetRequiredService<AnthropicClient>().AsIChatClient(answers.Model, answers.MaxOutputTokens), provider));
         });
 
         // HybridCache uses a registered IDistributedCache as its second level (HybridCache docs).
@@ -115,6 +123,18 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddHybridCache();
         return services;
     }
+
+    /// <summary>
+    /// GenAI spans around a model client (spec 0006, R6.15), innermost so they record the SDK's own request and
+    /// response. Without a tracer listening, the wrapper does nothing.
+    /// </summary>
+    private static IChatClient WithTelemetry(IChatClient inner, IServiceProvider provider) =>
+        new ChatClientBuilder(inner)
+            .UseOpenTelemetry(configure: chat => chat.EnableSensitiveData = CaptureContent(provider))
+            .Build(provider);
+
+    private static bool CaptureContent(IServiceProvider provider) =>
+        provider.GetRequiredService<IOptions<TelemetryOptions>>().Value.CaptureContent;
 
     private static NpgsqlDataSource BuildDataSource(IConfiguration configuration)
     {

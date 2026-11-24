@@ -9,7 +9,7 @@ public static class SearchEndpoints
 {
     public static IEndpointRouteBuilder MapSearchEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/search", SearchAsync).WithName("Search");
+        app.MapGet("/search", SearchAsync).WithName("Search").WithRateLimit(RateLimitBucket.Read);
         return app;
     }
 
@@ -24,33 +24,12 @@ public static class SearchEndpoints
         var question = q?.Trim() ?? "";
         var k = topK ?? settings.DefaultTopK;
 
-        var errors = Validate(question, k, settings);
+        var errors = RequestValidation.Question(question, k, settings, "q", "query");
         if (errors.Count > 0)
         {
             return TypedResults.ValidationProblem(errors);
         }
 
         return TypedResults.Ok(await search.RunAsync(question, k, cancellationToken).ConfigureAwait(false));
-    }
-
-    // Validation at the edge (spec 0002, P9): nothing invalid reaches the model or the database.
-    private static Dictionary<string, string[]> Validate(string question, int topK, SearchOptions settings)
-    {
-        var errors = new Dictionary<string, string[]>(StringComparer.Ordinal);
-        if (question.Length == 0)
-        {
-            errors["q"] = ["The query is required."];
-        }
-        else if (question.Length > settings.MaxQueryLength)
-        {
-            errors["q"] = [$"The query must be at most {settings.MaxQueryLength} characters."];
-        }
-
-        if (topK < 1 || topK > settings.MaxTopK)
-        {
-            errors["topK"] = [$"topK must be between 1 and {settings.MaxTopK}."];
-        }
-
-        return errors;
     }
 }

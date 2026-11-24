@@ -13,7 +13,7 @@ public static class AskEndpoints
 {
     public static IEndpointRouteBuilder MapAskEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapPost("/ask", AskAsync).WithName("Ask");
+        app.MapPost("/ask", AskAsync).WithName("Ask").WithRateLimit(RateLimitBucket.Ask);
         return app;
     }
 
@@ -27,21 +27,7 @@ public static class AskEndpoints
         var question = request.Question?.Trim() ?? "";
         var k = request.TopK ?? settings.DefaultTopK;
 
-        var errors = new Dictionary<string, string[]>(StringComparer.Ordinal);
-        if (question.Length == 0)
-        {
-            errors["question"] = ["The question is required."];
-        }
-        else if (question.Length > settings.MaxQueryLength)
-        {
-            errors["question"] = [$"The question must be at most {settings.MaxQueryLength} characters."];
-        }
-
-        if (k < 1 || k > settings.MaxTopK)
-        {
-            errors["topK"] = [$"topK must be between 1 and {settings.MaxTopK}."];
-        }
-
+        var errors = RequestValidation.Question(question, k, settings, "question", "question");
         if (errors.Count > 0)
         {
             return TypedResults.ValidationProblem(errors);
